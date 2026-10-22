@@ -30,31 +30,31 @@
                         },
                         director: {
                             light: '#e0e7ff',
-                            DEFAULT: '#4338ca',
+                            DEFAULT: '#3730a3',
                             dark: '#312e81',
                             border: '#818cf8',
                             bg: '#f5f3ff'
                         },
                         special: {
                             light: '#f3e8ff',
-                            DEFAULT: '#7e22ce',
+                            DEFAULT: '#6b21a8',
                             dark: '#581c87',
                             border: '#c084fc',
                             bg: '#faf5ff'
                         },
                         counseling: {
-                            light: '#dcfce7',
-                            DEFAULT: '#15803d',
-                            dark: '#14532d',
-                            border: '#4ade80',
-                            bg: '#f0fdf4'
+                            light: '#d1fae5',
+                            DEFAULT: '#065f46',
+                            dark: '#064e3b',
+                            border: '#34d399',
+                            bg: '#ecfdf5'
                         },
                         registration: {
-                            light: '#e0f2fe',
-                            DEFAULT: '#0369a1',
-                            dark: '#0c4a6e',
-                            border: '#38bdf8',
-                            bg: '#f0f9ff'
+                            light: '#cffafe',
+                            DEFAULT: '#155e75',
+                            dark: '#164e63',
+                            border: '#22d3ee',
+                            bg: '#ecfeff'
                         }
                     }
                 }
@@ -63,7 +63,7 @@
     </script>
 
     <style>
-        /* Custom subtle scrollbar */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -99,9 +99,6 @@
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            .page-break {
-                page-break-before: always;
-            }
         }
     </style>
 </head>
@@ -116,7 +113,7 @@
             <div class="flex items-center justify-between h-16">
                 
                 <!-- School Emblem SVG Logo & Title -->
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="goToCurrentCalendarWeek()">
                     <!-- Vector SVG Rixin School Emblem -->
                     <div class="shrink-0 p-1 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 flex items-center justify-center">
                         <svg viewBox="0 0 200 200" class="w-9 h-9">
@@ -163,26 +160,33 @@
                 </div>
 
                 <!-- Right Quick Controls -->
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    
+                    <!-- Quick Button: Jump to Real Current Week -->
+                    <button onclick="goToCurrentCalendarWeek()" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white text-xs px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 transition shadow-sm" title="自動比對今日日期切換至本週">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                        <span>📍 回到本週</span>
+                    </button>
+
                     <!-- Week Nav Dropdown -->
                     <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
-                        <button onclick="changeWeek(-1)" title="上一週" class="p-1.5 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
+                        <button onclick="changeWeek(-1)" title="上一週" class="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
                             <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         </button>
-                        <select id="weekSelect" onchange="handleWeekSelect(this.value)" class="bg-transparent text-sm text-white font-medium px-2 py-1 focus:outline-none cursor-pointer">
+                        <select id="weekSelect" onchange="handleWeekSelect(this.value)" class="bg-transparent text-xs sm:text-sm text-white font-medium px-2 py-1 focus:outline-none cursor-pointer max-w-[150px] sm:max-w-xs truncate">
                             <!-- Populated dynamically -->
                         </select>
-                        <button onclick="changeWeek(1)" title="下一週" class="p-1.5 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
+                        <button onclick="changeWeek(1)" title="下一週" class="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                         </button>
                     </div>
 
-                    <button onclick="openModal('addWeekModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                    <button onclick="openModal('addWeekModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-2 rounded-lg border border-slate-700 flex items-center gap-1 transition">
                         <i data-lucide="calendar-plus" class="w-4 h-4 text-rixinRed-500"></i>
                         <span class="hidden sm:inline">新增週次</span>
                     </button>
 
-                    <button onclick="openModal('backupModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-1.5 transition" title="資料備份與還原">
+                    <button onclick="openModal('backupModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-2 rounded-lg border border-slate-700 flex items-center gap-1 transition" title="資料備份與還原">
                         <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
                         <span class="hidden md:inline">備份/還原</span>
                     </button>
@@ -199,14 +203,20 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100 mb-3">
                 <div class="flex flex-wrap items-center gap-2 text-slate-600 text-sm">
                     <!-- Week Badge -->
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-rixinRed-50 text-rixinRed-800 font-bold rounded-lg border border-rixinRed-200">
+                    <span id="currentWeekTagContainer" class="inline-flex items-center gap-1.5 px-3 py-1 bg-rixinRed-50 text-rixinRed-800 font-bold rounded-lg border border-rixinRed-200">
                         <i data-lucide="calendar" class="w-4 h-4 text-rixinRed-700"></i>
-                        <span id="currentWeekTag">113學年度 第1學期 第8週</span>
+                        <span id="currentWeekTag">讀取中...</span>
+                    </span>
+
+                    <!-- Today Indicator Tag -->
+                    <span id="isTodayWeekBadge" class="hidden text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-300 items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                        今天在本週內
                     </span>
                     
                     <!-- Date Range -->
                     <span id="currentDateRange" class="text-xs text-slate-600 font-medium bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-                        2026/10/19 ~ 2026/10/25
+                        —
                     </span>
 
                     <!-- Week Focus / Notes Badge -->
@@ -235,7 +245,7 @@
 
             <!-- Row 2: Office Group / Role Filter Bar -->
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                <div class="flex items-center gap-1 overflow-x-auto pb-1 lg:pb-0 scrollbar-none w-full">
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none w-full">
                     <span class="text-xs font-semibold text-slate-500 mr-1 whitespace-nowrap">處室組別切換：</span>
                     
                     <button onclick="setRole('all')" id="roleBtn-all" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
@@ -244,22 +254,22 @@
                     </button>
                     
                     <button onclick="setRole('director')" id="roleBtn-director" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
-                        <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-700"></span>
                         輔導主任
                     </button>
 
                     <button onclick="setRole('special')" id="roleBtn-special" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
-                        <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-purple-700"></span>
                         特教組
                     </button>
 
                     <button onclick="setRole('counseling')" id="roleBtn-counseling" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
-                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-700"></span>
                         輔導組
                     </button>
 
                     <button onclick="setRole('registration')" id="roleBtn-registration" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
-                        <span class="w-2 h-2 rounded-full bg-cyan-600"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-700"></span>
                         資註組
                     </button>
                 </div>
@@ -817,7 +827,7 @@
 
                 <div>
                     <h4 class="text-sm font-bold text-rose-600 mb-1">重置為日新國小預設範例資料</h4>
-                    <p class="text-xs text-slate-500 mb-2">如需重新載入預設的日新國小輔導室範例資料，可點擊重置。</p>
+                    <p class="text-xs text-slate-500 mb-2">如需重新載入動態預設的日新國小輔導室範例資料，可點擊重置。</p>
                     <button onclick="promptResetDemoData()" class="text-xs text-rose-600 border border-rose-200 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition">
                         重置為預設範例資料
                     </button>
@@ -831,129 +841,165 @@
     <script>
         // Guidance Office 4 Groups Meta Configurations
         const GROUPS = {
-            director: { id: 'director', name: '輔導主任', color: 'indigo', bgClass: 'bg-indigo-50', borderClass: 'border-indigo-200', textClass: 'text-indigo-700', badgeBg: 'bg-indigo-600' },
-            special: { id: 'special', name: '特教組', color: 'purple', bgClass: 'bg-purple-50', borderClass: 'border-purple-200', textClass: 'text-purple-700', badgeBg: 'bg-purple-600' },
-            counseling: { id: 'counseling', name: '輔導組', color: 'emerald', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-200', textClass: 'text-emerald-700', badgeBg: 'bg-emerald-600' },
-            registration: { id: 'registration', name: '資註組', color: 'cyan', bgClass: 'bg-cyan-50', borderClass: 'border-cyan-200', textClass: 'text-cyan-700', badgeBg: 'bg-cyan-600' }
+            director: { id: 'director', name: '輔導主任', color: 'indigo', bgClass: 'bg-indigo-50', borderClass: 'border-indigo-200', textClass: 'text-indigo-800', badgeBg: 'bg-indigo-700' },
+            special: { id: 'special', name: '特教組', color: 'purple', bgClass: 'bg-purple-50', borderClass: 'border-purple-200', textClass: 'text-purple-800', badgeBg: 'bg-purple-700' },
+            counseling: { id: 'counseling', name: '輔導組', color: 'emerald', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-200', textClass: 'text-emerald-800', badgeBg: 'bg-emerald-700' },
+            registration: { id: 'registration', name: '資註組', color: 'cyan', bgClass: 'bg-cyan-50', borderClass: 'border-cyan-200', textClass: 'text-cyan-800', badgeBg: 'bg-cyan-700' }
         };
 
-        // Rixin Elementary School Default Data
-        const DEFAULT_STATE = {
-            currentWeekId: '113-1-8',
-            selectedRole: 'all',
-            activeTab: 'announcements',
-            weeks: [
-                { id: '113-1-7', year: 113, semester: 1, week: 7, title: '第7週 - 評鑑準備與資料抽查週', startDate: '2026-10-12', endDate: '2026-10-18', notes: '備齊校內特教與輔導訪視檢核資料' },
-                { id: '113-1-8', year: 113, semester: 1, week: 8, title: '第8週 - 特教宣導與性平教育週', startDate: '2026-10-19', endDate: '2026-10-25', notes: '召開特推會，發放性平宣導學習單' },
-                { id: '113-1-9', year: 113, semester: 1, week: 9, title: '第9週 - 輔導紀錄簿與心理測驗初檢週', startDate: '2026-10-26', endDate: '2026-11-01', notes: '請導師送交心理測驗結果與紀錄簿' }
-            ],
-            announcements: [
-                {
-                    id: 'ann-1',
-                    weekId: '113-1-8',
-                    groupId: 'director',
-                    title: '113學年度第一學期 臺北市特教業務評鑑整備提醒',
-                    target: '全校教職員',
-                    priority: '緊急',
-                    status: '進行中',
-                    eventDate: '2026-10-22',
-                    eventTime: '08:40 - 12:00',
-                    content: '教育局訪視評鑑小組將於本週四進行輔導與特教業務實地視導，請特教組、輔導組與各學年代表備妥近三年檢核資料。',
-                    updatedAt: '2026-10-19 09:00'
-                },
-                {
-                    id: 'ann-2',
-                    weekId: '113-1-8',
-                    groupId: 'special',
-                    title: '10/21(三) 召開特教推行委員會(特推會)第二次會議',
-                    target: '特教教師',
-                    priority: '重要',
-                    status: '進行中',
-                    eventDate: '2026-10-21',
-                    eventTime: '12:30 - 13:30',
-                    content: '請特推會委員及各年級導師代表準時至校史室參會，審議下學期特教助理員申請與IEP追蹤計畫。',
-                    updatedAt: '2026-10-19 10:15'
-                },
-                {
-                    id: 'ann-3',
-                    weekId: '113-1-8',
-                    groupId: 'counseling',
-                    title: '辦理全校「性別平等教育主題宣導」有獎徵答',
-                    target: '全校學生',
-                    priority: '普通',
-                    status: '進行中',
-                    eventDate: '2026-10-23',
-                    eventTime: '晨會時間',
-                    content: '請各班導師協助發放學習單，填妥後於 10/25(五) 前投入輔導室投獎箱，將於下週一公開抽獎。',
-                    updatedAt: '2026-10-19 11:30'
-                },
-                {
-                    id: 'ann-4',
-                    weekId: '113-1-8',
-                    groupId: 'registration',
-                    title: '四、六年級學生心理測驗登錄與紙本輔導紀錄簿送核',
-                    target: '各班導師',
-                    priority: '重要',
-                    status: '進行中',
-                    eventDate: '2026-10-23',
-                    eventTime: '16:00 前',
-                    content: '請導師登入校務行政系統確認測驗結果，並於本週五前將紙本輔導紀錄簿送至資註組完成初檢與核章。',
-                    updatedAt: '2026-10-19 14:00'
-                }
-            ],
-            proposals: [
-                {
-                    id: 'prop-1',
-                    weekId: '113-1-8',
-                    groupId: 'special',
-                    subject: '擬辦理「日新國小 113學年度身心障礙學生個別化教育計畫 (IEP) 檢討會」案',
-                    description: '為檢視學習輔導成效，規劃於第 12 週邀集外聘專家、特教團隊與學生家長召開檢討會。',
-                    proposedAction: '奉核後由特教組發函通知專家團隊與家長，並簽請發給專家出席費與公假排代。',
-                    priority: '重要',
-                    status: '報局核備中',
-                    resolution: '原則通過，請注意時間避開期末定期考查，並報請教育局核備。',
-                    updatedAt: '2026-10-19 15:00'
-                },
-                {
-                    id: 'prop-2',
-                    weekId: '113-1-8',
-                    groupId: 'counseling',
-                    subject: '申請辦理「日新國小高關懷學生校外生態體驗輔導活動」實施計畫',
-                    description: '針對校內需正向行為支持之高關懷學生，安排一日農場生態體驗活動，建立同儕輔導支持網絡。',
-                    proposedAction: '擬向教育局申請專案補助新臺幣 28,000 元，並簽請派隨隊教師公假排代。',
-                    priority: '普通',
-                    status: '執行中',
-                    resolution: '照案通過，請輔導組確實宣導並完成家長同意書徵求。',
-                    updatedAt: '2026-10-19 16:20'
-                },
-                {
-                    id: 'prop-3',
-                    weekId: '113-1-8',
-                    groupId: 'registration',
-                    subject: '建請採購續約輔導室心理測驗線上授權與資安備份升級案',
-                    description: '輔導室測驗系統現有授權即將到期，且學生個資防護設備需增購外接備份硬體。',
-                    proposedAction: '擬採購一年期系統授權與資安硬體，經費由輔導室相關業務費項下支應。',
-                    priority: '普通',
-                    status: '主管會議討論中',
-                    resolution: '請資註組補充兩家以上廠商報價單後再行簽核。',
-                    updatedAt: '2026-10-20 09:10'
-                }
-            ]
-        };
+        // Helper: Format Date object to YYYY-MM-DD
+        function formatDateStr(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Helper: Get Monday and Sunday for a reference date
+        function getWeekDateRange(refDate, weekOffset = 0) {
+            const d = new Date(refDate);
+            const day = d.getDay();
+            const diffToMonday = (day === 0 ? -6 : 1) - day + (weekOffset * 7);
+            
+            const monday = new Date(d);
+            monday.setDate(d.getDate() + diffToMonday);
+            
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            return {
+                startDate: formatDateStr(monday),
+                endDate: formatDateStr(sunday)
+            };
+        }
+
+        // Generate Dynamic Default Seed State (Guarantees current calendar week exists)
+        function generateDefaultSeedState() {
+            const today = new Date();
+            const w8Range = getWeekDateRange(today, 0);   // Current week = Week 8
+            const w7Range = getWeekDateRange(today, -1);  // Last week = Week 7
+            const w9Range = getWeekDateRange(today, 1);   // Next week = Week 9
+
+            return {
+                currentWeekId: '113-1-8',
+                selectedRole: 'all',
+                activeTab: 'announcements',
+                weeks: [
+                    { id: '113-1-7', year: 113, semester: 1, week: 7, title: '第7週 - 評鑑準備與資料抽查週', startDate: w7Range.startDate, endDate: w7Range.endDate, notes: '備齊校內特教與輔導訪視檢核資料' },
+                    { id: '113-1-8', year: 113, semester: 1, week: 8, title: '第8週 - 特教宣導與性平教育週', startDate: w8Range.startDate, endDate: w8Range.endDate, notes: '召開特推會，發放性平宣導學習單' },
+                    { id: '113-1-9', year: 113, semester: 1, week: 9, title: '第9週 - 輔導紀錄簿與心理測驗初檢週', startDate: w9Range.startDate, endDate: w9Range.endDate, notes: '請導師送交心理測驗結果與紀錄簿' }
+                ],
+                announcements: [
+                    {
+                        id: 'ann-1',
+                        weekId: '113-1-8',
+                        groupId: 'director',
+                        title: '113學年度第一學期 臺北市特教業務評鑑整備提醒',
+                        target: '全校教職員',
+                        priority: '緊急',
+                        status: '進行中',
+                        eventDate: w8Range.startDate,
+                        eventTime: '08:40 - 12:00',
+                        content: '教育局訪視評鑑小組將於本週進行輔導與特教業務實地視導，請特教組、輔導組與各學年代表備妥近三年檢核資料。',
+                        updatedAt: `${w8Range.startDate} 09:00`
+                    },
+                    {
+                        id: 'ann-2',
+                        weekId: '113-1-8',
+                        groupId: 'special',
+                        title: '召開特教推行委員會(特推會)第二次會議',
+                        target: '特教教師',
+                        priority: '重要',
+                        status: '進行中',
+                        eventDate: w8Range.startDate,
+                        eventTime: '12:30 - 13:30',
+                        content: '請特推會委員及各年級導師代表準時至校史室參會，審議下學期特教助理員申請與IEP追蹤計畫。',
+                        updatedAt: `${w8Range.startDate} 10:15`
+                    },
+                    {
+                        id: 'ann-3',
+                        weekId: '113-1-8',
+                        groupId: 'counseling',
+                        title: '辦理全校「性別平等教育主題宣導」有獎徵答',
+                        target: '全校學生',
+                        priority: '普通',
+                        status: '進行中',
+                        eventDate: w8Range.endDate,
+                        eventTime: '晨會時間',
+                        content: '請各班導師協助發放學習單，填妥後投入輔導室投獎箱，將於下週一公開抽獎。',
+                        updatedAt: `${w8Range.startDate} 11:30`
+                    },
+                    {
+                        id: 'ann-4',
+                        weekId: '113-1-8',
+                        groupId: 'registration',
+                        title: '四、六年級學生心理測驗登錄與紙本輔導紀錄簿送核',
+                        target: '各班導師',
+                        priority: '重要',
+                        status: '進行中',
+                        eventDate: w8Range.endDate,
+                        eventTime: '16:00 前',
+                        content: '請導師登入校務行政系統確認測驗結果，並於本週五前將紙本輔導紀錄簿送至資註組完成初檢與核章。',
+                        updatedAt: `${w8Range.startDate} 14:00`
+                    }
+                ],
+                proposals: [
+                    {
+                        id: 'prop-1',
+                        weekId: '113-1-8',
+                        groupId: 'special',
+                        subject: '擬辦理「日新國小 113學年度身心障礙學生個別化教育計畫 (IEP) 檢討會」案',
+                        description: '為檢視學習輔導成效，規劃於第 12 週邀集外聘專家、特教團隊與學生家長召開檢討會。',
+                        proposedAction: '奉核後由特教組發函通知專家團隊與家長，並簽請發給專家出席費與公假排代。',
+                        priority: '重要',
+                        status: '報局核備中',
+                        resolution: '原則通過，請注意時間避開期末定期考查，並報請教育局核備。',
+                        updatedAt: `${w8Range.startDate} 15:00`
+                    },
+                    {
+                        id: 'prop-2',
+                        weekId: '113-1-8',
+                        groupId: 'counseling',
+                        subject: '申請辦理「日新國小高關懷學生校外生態體驗輔導活動」實施計畫',
+                        description: '針對校內需正向行為支持之高關懷學生，安排一日農場生態體驗活動，建立同儕輔導支持網絡。',
+                        proposedAction: '擬向教育局申請專案補助新臺幣 28,000 元，並簽請派隨隊教師公假排代。',
+                        priority: '普通',
+                        status: '執行中',
+                        resolution: '照案通過，請輔導組確實宣導並完成家長同意書徵求。',
+                        updatedAt: `${w8Range.startDate} 16:20`
+                    },
+                    {
+                        id: 'prop-3',
+                        weekId: '113-1-8',
+                        groupId: 'registration',
+                        subject: '建請採購續約輔導室心理測驗線上授權與資安備份升級案',
+                        description: '輔導室測驗系統現有授權即將到期，且學生個資防護設備需增購外接備份硬體。',
+                        proposedAction: '擬採購一年期系統授權與資安硬體，經費由輔導室相關業務費項下支應。',
+                        priority: '普通',
+                        status: '主管會議討論中',
+                        resolution: '請資註組補充兩家以上廠商報價單後再行簽核。',
+                        updatedAt: `${w8Range.startDate} 17:00`
+                    }
+                ]
+            };
+        }
 
         let appData = loadStorageData();
 
-        // Load data from LocalStorage
+        // Load data from LocalStorage (NEVER overwrite if user data exists)
         function loadStorageData() {
             try {
                 const stored = localStorage.getItem('rixin_guidance_app_data');
                 if (stored) {
-                    return JSON.parse(stored);
+                    const parsed = JSON.parse(stored);
+                    if (parsed && Array.isArray(parsed.weeks) && parsed.weeks.length > 0) {
+                        return parsed;
+                    }
                 }
             } catch (e) {
-                console.error("LocalStorage error", e);
+                console.error("LocalStorage load error", e);
             }
-            return JSON.parse(JSON.stringify(DEFAULT_STATE));
+            return generateDefaultSeedState();
         }
 
         // Save data to LocalStorage
@@ -966,8 +1012,40 @@
             }
         }
 
+        // Find Week ID corresponding to Today's date
+        function findCalendarWeekByToday() {
+            const todayStr = formatDateStr(new Date());
+            const matchedWeek = appData.weeks.find(w => todayStr >= w.startDate && todayStr <= w.endDate);
+            return matchedWeek ? matchedWeek.id : null;
+        }
+
+        // Jump to Real Current Week Automatically
+        function goToCurrentCalendarWeek(showNotification = false) {
+            const todayWeekId = findCalendarWeekByToday();
+            if (todayWeekId) {
+                appData.currentWeekId = todayWeekId;
+                saveStorageData();
+                renderHeaderWeeks();
+                updateCurrentWeekDisplay();
+                renderActiveTabContent();
+                if (showNotification) showToast("已切換至今日所屬之「本週」！", "success");
+            } else {
+                if (showNotification) {
+                    showToast(`今天（${formatDateStr(new Date())}）未在現有週次範圍內，您可以點擊「新增週次」建立新行事曆。`, "info");
+                }
+            }
+        }
+
         // Initialize Application
         function initApp() {
+            // Auto-detect Today's week on startup
+            const todayWeekId = findCalendarWeekByToday();
+            if (todayWeekId) {
+                appData.currentWeekId = todayWeekId;
+            } else if (!appData.currentWeekId || !appData.weeks.some(w => w.id === appData.currentWeekId)) {
+                if (appData.weeks.length > 0) appData.currentWeekId = appData.weeks[0].id;
+            }
+
             renderHeaderWeeks();
             updateCurrentWeekDisplay();
             renderRoleButtons();
@@ -988,10 +1066,16 @@
                 return;
             }
 
+            const todayStr = formatDateStr(new Date());
+
             appData.weeks.forEach(w => {
                 const opt = document.createElement('option');
                 opt.value = w.id;
-                const label = w.title ? `${w.title}` : `${w.year}學年度 第${w.semester}學期 第${w.week}週`;
+                
+                const isTodayWeek = (todayStr >= w.startDate && todayStr <= w.endDate);
+                const tag = isTodayWeek ? ' [本週]' : '';
+                const label = w.title ? `${w.title}${tag}` : `${w.year}學年 第${w.semester}學期 第${w.week}週${tag}`;
+                
                 opt.textContent = label;
                 if (w.id === appData.currentWeekId) opt.selected = true;
                 select.appendChild(opt);
@@ -1006,6 +1090,18 @@
                 document.getElementById('currentWeekTag').textContent = tagText;
                 document.getElementById('currentDateRange').textContent = `${currentWeek.startDate} ~ ${currentWeek.endDate}`;
 
+                const todayStr = formatDateStr(new Date());
+                const isToday = (todayStr >= currentWeek.startDate && todayStr <= currentWeek.endDate);
+                const isTodayBadge = document.getElementById('isTodayWeekBadge');
+
+                if (isToday) {
+                    isTodayBadge.classList.remove('hidden');
+                    isTodayBadge.classList.add('inline-flex');
+                } else {
+                    isTodayBadge.classList.add('hidden');
+                    isTodayBadge.classList.remove('inline-flex');
+                }
+
                 const notesBadge = document.getElementById('currentWeekNotesBadge');
                 const notesText = document.getElementById('currentWeekNotesText');
                 if (currentWeek.notes) {
@@ -1019,6 +1115,7 @@
             } else {
                 document.getElementById('currentWeekTag').textContent = "未選擇週次";
                 document.getElementById('currentDateRange').textContent = "—";
+                document.getElementById('isTodayWeekBadge').classList.add('hidden');
                 document.getElementById('currentWeekNotesBadge').classList.add('hidden');
             }
         }
@@ -1044,7 +1141,7 @@
                     updateCurrentWeekDisplay();
                     renderActiveTabContent();
                 } else {
-                    showToast("無更多週次，點擊「新增週次」按鈕建立新週次！", "info");
+                    showToast("無更多週次，可點擊「新增週次」按鈕建立！", "info");
                 }
             }
         }
@@ -1252,19 +1349,20 @@
             appData.proposals = appData.proposals.filter(p => p.weekId !== weekId);
 
             if (appData.weeks.length === 0) {
+                const range = getWeekDateRange(new Date(), 0);
                 const fallbackWeek = {
                     id: '113-1-1',
                     year: 113,
                     semester: 1,
                     week: 1,
                     title: '第1週 - 開學週',
-                    startDate: new Date().toISOString().slice(0,10),
-                    endDate: new Date().toISOString().slice(0,10),
+                    startDate: range.startDate,
+                    endDate: range.endDate,
                     notes: '新學期開始'
                 };
                 appData.weeks.push(fallbackWeek);
                 appData.currentWeekId = '113-1-1';
-                showToast("已無剩餘週次，系統自動為您建立「第1週」！", "info");
+                showToast("已無預設週次，系統自動建立本週「第1週」！", "info");
             } else if (appData.currentWeekId === weekId) {
                 appData.currentWeekId = appData.weeks[0].id;
             }
@@ -1293,19 +1391,23 @@
                 return;
             }
 
+            const todayStr = formatDateStr(new Date());
+
             appData.weeks.forEach(w => {
                 const annCount = appData.announcements.filter(a => a.weekId === w.id).length;
                 const propCount = appData.proposals.filter(p => p.weekId === w.id).length;
-                const isCurrent = (w.id === appData.currentWeekId);
+                const isSelected = (w.id === appData.currentWeekId);
+                const isTodayWeek = (todayStr >= w.startDate && todayStr <= w.endDate);
 
                 const tr = document.createElement('tr');
-                tr.className = isCurrent ? 'bg-rixinRed-50/60 font-medium' : 'hover:bg-slate-50';
+                tr.className = isSelected ? 'bg-rixinRed-50/60 font-medium' : 'hover:bg-slate-50';
 
                 tr.innerHTML = `
                     <td class="p-2.5">
                         <div class="font-bold text-slate-800 flex items-center gap-1.5">
-                            ${isCurrent ? '<span class="w-2 h-2 rounded-full bg-rixinRed-600"></span>' : ''}
+                            ${isSelected ? '<span class="w-2 h-2 rounded-full bg-rixinRed-600"></span>' : ''}
                             ${escapeHtml(w.title || `第${w.week}週`)}
+                            ${isTodayWeek ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold border border-emerald-300">[本週]</span>' : ''}
                         </div>
                         <div class="text-[10px] text-slate-400">${w.year}學年 第${w.semester}學期</div>
                     </td>
@@ -1339,7 +1441,7 @@
                     <div class="bg-white rounded-xl p-12 text-center border border-slate-200">
                         <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
                         <p class="text-slate-500 text-sm font-medium">日新國小輔導室 本週尚無符合條件的公告事項</p>
-                        <p class="text-slate-400 text-xs mt-1">點擊右上方「新增公告事項」開始填寫公告內容</p>
+                        <p class="text-slate-400 text-xs mt-1">點擊右上方「新增公告事項」開始填寫內容</p>
                     </div>
                 `;
                 lucide.createIcons();
@@ -1639,7 +1741,7 @@
 
             const weekTitle = currentWeek.title ? currentWeek.title : `${currentWeek.year}學年度 第${currentWeek.semester}學期 第${currentWeek.week}週`;
 
-            let text = `🏫【臺北市日新國小 輔導室處室每週公告】\n`;
+            let text = `🏫【臺北市日新國小 輔導室第 ${currentWeek.week} 週處室公告】\n`;
             text += `📅 週次：${weekTitle} (${currentWeek.startDate} ~ ${currentWeek.endDate})\n`;
             if (currentWeek.notes) text += `📌 當週重點：${currentWeek.notes}\n`;
             text += `====================================\n\n`;
@@ -1925,10 +2027,10 @@
         function promptResetDemoData() {
             showConfirmModal({
                 title: '重置日新國小範例資料',
-                message: '確定要重置為預設的日新國小輔導室範例資料嗎？現有資料將被覆蓋。',
+                message: '確定要重置為預設的日新國小輔導室範例資料嗎？您目前的資料將被覆蓋。',
                 okText: '重置資料',
                 onConfirm: () => {
-                    appData = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                    appData = generateDefaultSeedState();
                     saveStorageData();
                     closeModal('backupModal');
                     initApp();
@@ -1961,7 +2063,7 @@
             reader.onload = function(e) {
                 try {
                     const parsed = JSON.parse(e.target.result);
-                    if (parsed && parsed.weeks && parsed.announcements) {
+                    if (parsed && Array.isArray(parsed.weeks) && Array.isArray(parsed.announcements)) {
                         appData = parsed;
                         saveStorageData();
                         closeModal('backupModal');
