@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺北市日新國小 輔導室事項管理系統</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        rixinRed: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#c62828',
+                            800: '#991b1b',
+                            900: '#7f1d1d'
+                        },
+                        director: {
+                            light: '#e0e7ff',
+                            DEFAULT: '#4338ca',
+                            dark: '#312e81',
+                            border: '#818cf8',
+                            bg: '#f5f3ff'
+                        },
+                        special: {
+                            light: '#f3e8ff',
+                            DEFAULT: '#7e22ce',
+                            dark: '#581c87',
+                            border: '#c084fc',
+                            bg: '#faf5ff'
+                        },
+                        counseling: {
+                            light: '#dcfce7',
+                            DEFAULT: '#15803d',
+                            dark: '#14532d',
+                            border: '#4ade80',
+                            bg: '#f0fdf4'
+                        },
+                        registration: {
+                            light: '#e0f2fe',
+                            DEFAULT: '#0369a1',
+                            dark: '#0c4a6e',
+                            border: '#38bdf8',
+                            bg: '#f0f9ff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom subtle scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Print Specific Styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            .print-container {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 text-white shadow-md no-print sticky top-0 z-30 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- School Emblem SVG Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <!-- Vector SVG Rixin School Emblem -->
+                    <div class="shrink-0 p-1 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 flex items-center justify-center">
+                        <svg viewBox="0 0 200 200" class="w-9 h-9">
+                            <defs>
+                                <g id="rixinRay">
+                                    <polygon points="100,5 118,65 100,50 82,65" fill="#D32F2F"/>
+                                    <polygon points="100,12 112,65 100,52 88,65" fill="#B71C1C"/>
+                                </g>
+                            </defs>
+                            <!-- 16 Sunburst Rays -->
+                            <g>
+                                <use href="#rixinRay" transform="rotate(0, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(22.5, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(45, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(67.5, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(90, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(112.5, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(135, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(157.5, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(180, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(202.5, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(225, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(247.5, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(270, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(292.5, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(315, 100, 100)"/>
+                                <use href="#rixinRay" transform="rotate(337.5, 100, 100)"/>
+                            </g>
+                            <!-- Inner Red Circle -->
+                            <circle cx="100" cy="100" r="52" fill="#D32F2F" stroke="#FFFFFF" stroke-width="4"/>
+                            <!-- Bold Character Text -->
+                            <text x="100" y="88" text-anchor="middle" fill="#FFFFFF" font-weight="900" font-size="34" font-family="'Noto Sans TC', sans-serif">日</text>
+                            <text x="100" y="126" text-anchor="middle" fill="#FFFFFF" font-weight="900" font-size="30" font-family="'Noto Sans TC', sans-serif">新</text>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-rixinRed-700 text-white text-[10px] px-1.5 py-0.5 rounded font-bold tracking-wider">臺北市</span>
+                            <h1 class="font-bold text-lg leading-tight tracking-wide">日新國小 輔導室事項管理系統</h1>
+                        </div>
+                        <p class="text-xs text-slate-400">Taipei Municipal Rixin Elementary School Guidance Office System</p>
+                    </div>
+                </div>
+
+                <!-- Right Quick Controls -->
+                <div class="flex items-center space-x-3">
+                    <!-- Week Nav Dropdown -->
+                    <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        <button onclick="changeWeek(-1)" title="上一週" class="p-1.5 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        <select id="weekSelect" onchange="handleWeekSelect(this.value)" class="bg-transparent text-sm text-white font-medium px-2 py-1 focus:outline-none cursor-pointer">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <button onclick="changeWeek(1)" title="下一週" class="p-1.5 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="openModal('addWeekModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                        <i data-lucide="calendar-plus" class="w-4 h-4 text-rixinRed-500"></i>
+                        <span class="hidden sm:inline">新增週次</span>
+                    </button>
+
+                    <button onclick="openModal('backupModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-1.5 transition" title="資料備份與還原">
+                        <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
+                        <span class="hidden md:inline">備份/還原</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-Header: Week Details & Section Role Switcher -->
+    <div class="bg-white border-b border-slate-200 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            
+            <!-- Row 1: Current Week Information Bar -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100 mb-3">
+                <div class="flex flex-wrap items-center gap-2 text-slate-600 text-sm">
+                    <!-- Week Badge -->
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-rixinRed-50 text-rixinRed-800 font-bold rounded-lg border border-rixinRed-200">
+                        <i data-lucide="calendar" class="w-4 h-4 text-rixinRed-700"></i>
+                        <span id="currentWeekTag">113學年度 第1學期 第8週</span>
+                    </span>
+                    
+                    <!-- Date Range -->
+                    <span id="currentDateRange" class="text-xs text-slate-600 font-medium bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                        2026/10/19 ~ 2026/10/25
+                    </span>
+
+                    <!-- Week Focus / Notes Badge -->
+                    <span id="currentWeekNotesBadge" class="text-xs text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 hidden md:inline-flex items-center gap-1 font-medium">
+                        <i data-lucide="bookmark" class="w-3.5 h-3.5 text-amber-600"></i>
+                        <span id="currentWeekNotesText">無備註</span>
+                    </span>
+                </div>
+
+                <!-- Actions: Edit Week, Delete Week, Semester Management -->
+                <div class="flex items-center gap-2 flex-wrap shrink-0">
+                    <button onclick="openEditWeekModal(appData.currentWeekId)" class="bg-white hover:bg-slate-100 text-slate-700 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 font-medium flex items-center gap-1 transition shadow-sm">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5 text-indigo-600"></i>
+                        編輯當週行事
+                    </button>
+                    <button onclick="promptDeleteWeek(appData.currentWeekId)" class="bg-white hover:bg-rose-50 text-rose-600 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 hover:border-rose-200 font-medium flex items-center gap-1 transition shadow-sm">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                        刪除當週行事曆
+                    </button>
+                    <button onclick="openWeekListModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1.5 rounded-lg border border-indigo-200 font-semibold flex items-center gap-1 transition shadow-sm">
+                        <i data-lucide="settings-2" class="w-3.5 h-3.5 text-indigo-600"></i>
+                        週次總表管理
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 2: Office Group / Role Filter Bar -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div class="flex items-center gap-1 overflow-x-auto pb-1 lg:pb-0 scrollbar-none w-full">
+                    <span class="text-xs font-semibold text-slate-500 mr-1 whitespace-nowrap">處室組別切換：</span>
+                    
+                    <button onclick="setRole('all')" id="roleBtn-all" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
+                        <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                        輔導室全覽
+                    </button>
+                    
+                    <button onclick="setRole('director')" id="roleBtn-director" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
+                        <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                        輔導主任
+                    </button>
+
+                    <button onclick="setRole('special')" id="roleBtn-special" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
+                        <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+                        特教組
+                    </button>
+
+                    <button onclick="setRole('counseling')" id="roleBtn-counseling" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        輔導組
+                    </button>
+
+                    <button onclick="setRole('registration')" id="roleBtn-registration" class="role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap border">
+                        <span class="w-2 h-2 rounded-full bg-cyan-600"></span>
+                        資註組
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- Navigation Tabs -->
+        <div class="flex border-b border-slate-200 mb-6 no-print space-x-8">
+            <button onclick="switchTab('announcements')" id="tabBtn-announcements" class="tab-btn pb-3 px-1 text-sm font-medium border-b-2 transition flex items-center gap-2">
+                <i data-lucide="megaphone" class="w-4 h-4"></i>
+                每週須公告事項
+                <span id="announcementBadge" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+            </button>
+            <button onclick="switchTab('proposals')" id="tabBtn-proposals" class="tab-btn pb-3 px-1 text-sm font-medium border-b-2 transition flex items-center gap-2">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                主管會議提案與決議
+                <span id="proposalBadge" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+            </button>
+            <button onclick="switchTab('report')" id="tabBtn-report" class="tab-btn pb-3 px-1 text-sm font-medium border-b-2 transition flex items-center gap-2">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                處室彙整與列印
+            </button>
+        </div>
+
+        <!-- ==================== TAB 1: WEEKLY ANNOUNCEMENTS ==================== -->
+        <div id="tab-announcements" class="tab-content">
+            <!-- Filter & Action Controls -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 no-print">
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative min-w-[200px]">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+                        <input type="text" id="announcementSearch" oninput="renderAnnouncements()" placeholder="搜尋標題或內容..." class="w-full pl-9 pr-3 py-1.5 bg-white text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    
+                    <select id="announcementTargetFilter" onchange="renderAnnouncements()" class="bg-white border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">所有對象</option>
+                        <option value="全校教職員">全校教職員</option>
+                        <option value="低年級">低年級</option>
+                        <option value="中年級">中年級</option>
+                        <option value="高年級">高年級</option>
+                        <option value="各班導師">各班導師</option>
+                        <option value="特教教師">特教教師</option>
+                        <option value="家長">家長</option>
+                        <option value="全校學生">全校學生</option>
+                    </select>
+
+                    <select id="announcementPriorityFilter" onchange="renderAnnouncements()" class="bg-white border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">所有優先程度</option>
+                        <option value="緊急">緊急</option>
+                        <option value="重要">重要</option>
+                        <option value="普通">普通</option>
+                    </select>
+
+                    <select id="announcementStatusFilter" onchange="renderAnnouncements()" class="bg-white border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">所有辦理狀態</option>
+                        <option value="進行中">進行中</option>
+                        <option value="已完成">已完成</option>
+                        <option value="延期">延期</option>
+                        <option value="取消">取消</option>
+                    </select>
+                </div>
+
+                <button onclick="openAnnouncementModal()" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm flex items-center justify-center gap-2 transition">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    新增公告事項
+                </button>
+            </div>
+
+            <!-- Announcements Cards Grid -->
+            <div id="announcementList" class="space-y-4">
+                <!-- Dynamically Generated -->
+            </div>
+        </div>
+
+        <!-- ==================== TAB 2: EXECUTIVE PROPOSALS ==================== -->
+        <div id="tab-proposals" class="tab-content hidden">
+            <!-- Filter & Action Controls -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 no-print">
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative min-w-[220px]">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+                        <input type="text" id="proposalSearch" oninput="renderProposals()" placeholder="搜尋案由或說明..." class="w-full pl-9 pr-3 py-1.5 bg-white text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <select id="proposalStatusFilter" onchange="renderProposals()" class="bg-white border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">所有執行追蹤狀態</option>
+                        <option value="研擬中">研擬中</option>
+                        <option value="主管會議討論中">主管會議討論中</option>
+                        <option value="報局核備中">報局核備中</option>
+                        <option value="執行中">執行中</option>
+                        <option value="已結案">已結案</option>
+                    </select>
+                </div>
+
+                <button onclick="openProposalModal()" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-sm flex items-center justify-center gap-2 transition">
+                    <i data-lucide="file-plus" class="w-4 h-4"></i>
+                    新增主管會議提案
+                </button>
+            </div>
+
+            <!-- Proposals List -->
+            <div id="proposalList" class="space-y-4">
+                <!-- Dynamically Generated -->
+            </div>
+        </div>
+
+        <!-- ==================== TAB 3: OFFICE REPORT & PRINT ==================== -->
+        <div id="tab-report" class="tab-content hidden">
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3 no-print bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-semibold text-slate-700">檢視與匯出類型：</span>
+                    <label class="inline-flex items-center gap-1.5 text-sm cursor-pointer">
+                        <input type="radio" name="reportType" value="full" checked onchange="renderReport()" class="text-rixinRed-700 focus:ring-rixinRed-500">
+                        完整輔導室週會會報
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 text-sm cursor-pointer">
+                        <input type="radio" name="reportType" value="executive" onchange="renderReport()" class="text-rixinRed-700 focus:ring-rixinRed-500">
+                        主管會議提案與決議單
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="copyFormattedText()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5 transition">
+                        <i data-lucide="copy" class="w-4 h-4 text-cyan-400"></i>
+                        一鍵複製 LINE / 群組訊息
+                    </button>
+                    <button onclick="window.print()" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5 transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        列印 / 另存 PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Document Layout Paper -->
+            <div id="reportPaper" class="bg-white p-8 sm:p-12 rounded-xl border border-slate-200 shadow-lg max-w-4xl mx-auto print-container">
+                <!-- Dynamically Rendered Paper View -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            臺北市大同區日新國民小學 輔導室行政智慧管理系統 &copy; 2026 | 專為智慧校園處室協作設計
+        </div>
+    </footer>
+
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal: Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 id="confirmModalTitle" class="font-bold text-base flex items-center gap-2 text-rose-400">
+                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    確認執行操作
+                </h3>
+                <button onclick="closeModal('confirmModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p id="confirmModalMessage" class="text-sm text-slate-700 font-medium leading-relaxed"></p>
+                <div id="confirmModalDetails" class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1"></div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('confirmModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
+                    <button id="confirmModalOkBtn" type="button" class="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-sm transition">確認執行</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal: Edit Week Info Modal -->
+    <div id="editWeekModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="pencil" class="w-5 h-5 text-rixinRed-500"></i>
+                    編輯當週行事曆資訊
+                </h3>
+                <button onclick="closeModal('editWeekModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="editWeekForm" onsubmit="saveWeekInfo(event)" class="p-6 space-y-4">
+                <input type="hidden" id="editWeekTargetId">
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">學年度</label>
+                        <input type="number" id="editWeekYear" required class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">學期</label>
+                        <select id="editWeekSemester" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="1">第1學期</option>
+                            <option value="2">第2學期</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">週次</label>
+                        <input type="number" id="editWeekNum" required min="1" max="30" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">週次自訂主題/名稱</label>
+                    <input type="text" id="editWeekTitle" placeholder="例如：第8週 - 特教宣導與性平教育週" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">開始日期</label>
+                        <input type="date" id="editWeekStartDate" required class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">結束日期</label>
+                        <input type="date" id="editWeekEndDate" required class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">當週重點備忘 <span class="text-slate-400 font-normal">(選填)</span></label>
+                    <textarea id="editWeekNotes" rows="2" placeholder="例：特推會、親師座談會、性平學習單交回..." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('editWeekModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal: Semester Weeks Overview List -->
+    <div id="weekListModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="settings-2" class="w-5 h-5 text-rixinRed-500"></i>
+                    全學期週次總表管理
+                </h3>
+                <button onclick="closeModal('weekListModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2 shrink-0">
+                <p class="text-xs text-slate-600">檢視與維護日新國小全學期週次行事曆，可編輯日期或安全刪除。</p>
+                <button onclick="closeModal('weekListModal'); openModal('addWeekModal');" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 transition">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    新增週次
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-1">
+                <table class="w-full text-xs text-left text-slate-700 border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-900 border-b border-slate-200">
+                            <th class="p-2.5 font-bold">週次 / 主題</th>
+                            <th class="p-2.5 font-bold">日期範圍</th>
+                            <th class="p-2.5 font-bold">當週重點備忘</th>
+                            <th class="p-2.5 font-bold text-center">公告數</th>
+                            <th class="p-2.5 font-bold text-center">提案數</th>
+                            <th class="p-2.5 font-bold text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weekTableBody" class="divide-y divide-slate-200">
+                        <!-- Dynamically generated rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal: Add / Edit Announcement -->
+    <div id="announcementModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 id="announcementModalTitle" class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="megaphone" class="w-5 h-5 text-rixinRed-500"></i>
+                    新增公告事項
+                </h3>
+                <button onclick="closeModal('announcementModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="announcementForm" onsubmit="saveAnnouncement(event)" class="p-6 space-y-4">
+                <input type="hidden" id="announcementId">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">提案組別</label>
+                    <select id="announcementGroup" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="director">輔導主任</option>
+                        <option value="special">特教組</option>
+                        <option value="counseling">輔導組</option>
+                        <option value="registration">資註組</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">公告標題 <span class="text-rose-500">*</span></label>
+                    <input type="text" id="announcementTitle" required placeholder="例如：113學年度第一學期特教推委會第二次會議通知" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">公告對象</label>
+                        <select id="announcementTarget" class="w-full text-sm border border-slate-300 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="全校教職員">全校教職員</option>
+                            <option value="低年級">低年級</option>
+                            <option value="中年級">中年級</option>
+                            <option value="高年級">高年級</option>
+                            <option value="各班導師">各班導師</option>
+                            <option value="特教教師">特教教師</option>
+                            <option value="家長">家長</option>
+                            <option value="全校學生">全校學生</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">優先程度</label>
+                        <select id="announcementPriority" class="w-full text-sm border border-slate-300 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="普通">普通</option>
+                            <option value="重要">重要</option>
+                            <option value="緊急">緊急</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">辦理狀態</label>
+                        <select id="announcementStatus" class="w-full text-sm border border-slate-300 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="進行中">進行中</option>
+                            <option value="已完成">已完成</option>
+                            <option value="延期">延期</option>
+                            <option value="取消">取消</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 活動/執行日期與時間欄位 -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">活動/執行日期</label>
+                        <input type="date" id="announcementEventDate" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">活動/執行時間</label>
+                        <input type="text" id="announcementEventTime" placeholder="例：12:30 - 13:30 或 晨會時間" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">詳細內容 <span class="text-rose-500">*</span></label>
+                    <textarea id="announcementContent" required rows="4" placeholder="請填寫詳細公告內容、地點或注意事項..." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('announcementModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存公告</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal: Add / Edit Executive Proposal -->
+    <div id="proposalModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 id="proposalModalTitle" class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-5 h-5 text-rixinRed-500"></i>
+                    新增主管會議提案
+                </h3>
+                <button onclick="closeModal('proposalModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="proposalForm" onsubmit="saveProposal(event)" class="p-6 space-y-4">
+                <input type="hidden" id="proposalId">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">提案組別</label>
+                        <select id="proposalGroup" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="director">輔導主任</option>
+                            <option value="special">特教組</option>
+                            <option value="counseling">輔導組</option>
+                            <option value="registration">資註組</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">優先程度</label>
+                        <select id="proposalPriority" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="普通">普通</option>
+                            <option value="重要">重要</option>
+                            <option value="緊急">緊急</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">提案標題 / 案由 <span class="text-rose-500">*</span></label>
+                    <input type="text" id="proposalSubject" required placeholder="例如：日新國小辦理高關懷學生校外生態體驗體驗活動案" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">說明 (背景與緣由) <span class="text-rose-500">*</span></label>
+                    <textarea id="proposalDescription" required rows="3" placeholder="請詳細敘述提案背景、原因與法規依據..." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">擬辦方式 <span class="text-rose-500">*</span></label>
+                    <textarea id="proposalAction" required rows="2" placeholder="請列出具體建議辦理方式、時間、經費與需求..." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">執行追蹤狀態</label>
+                        <select id="proposalStatus" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="研擬中">研擬中</option>
+                            <option value="主管會議討論中">主管會議討論中</option>
+                            <option value="報局核備中">報局核備中</option>
+                            <option value="執行中">執行中</option>
+                            <option value="已結案">已結案</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">主管會議決議與主任指示</label>
+                        <input type="text" id="proposalResolution" placeholder="例：照案通過，請輔導組確實執行" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('proposalModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存提案</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal: Add New Week -->
+    <div id="addWeekModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="calendar-plus" class="w-5 h-5 text-rixinRed-500"></i>
+                    新增學期與週次
+                </h3>
+                <button onclick="closeModal('addWeekModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="addWeekForm" onsubmit="saveNewWeek(event)" class="p-6 space-y-4">
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">學年度</label>
+                        <input type="number" id="newYear" required value="113" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">學期</label>
+                        <select id="newSemester" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="1">第1學期</option>
+                            <option value="2">第2學期</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">週次</label>
+                        <input type="number" id="newWeekNum" required min="1" max="30" value="10" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">週次主題/名稱</label>
+                    <input type="text" id="newWeekTitle" placeholder="例如：第10週 - 心理健康宣導週" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">開始日期</label>
+                        <input type="date" id="newStartDate" required class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">結束日期</label>
+                        <input type="date" id="newEndDate" required class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">當週重點備忘 <span class="text-slate-400 font-normal">(選填)</span></label>
+                    <textarea id="newWeekNotes" rows="2" placeholder="例：全校宣導活動、抽查紀錄簿..." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('addWeekModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">新增週次</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal: Data Backup & Restoration (JSON) -->
+    <div id="backupModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="database" class="w-5 h-5 text-cyan-400"></i>
+                    日新國小輔導室 資料備份與復原
+                </h3>
+                <button onclick="closeModal('backupModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <div>
+                    <h4 class="text-sm font-bold text-slate-800 mb-1">匯出處室資料備份</h4>
+                    <p class="text-xs text-slate-500 mb-3">導出一份 JSON 檔案，保存日新國小輔導室的所有公告、提案與週次設定。</p>
+                    <button onclick="exportJSONData()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition">
+                        <i data-lucide="download" class="w-4 h-4 text-cyan-400"></i>
+                        下載備份 JSON 檔案
+                    </button>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <div>
+                    <h4 class="text-sm font-bold text-slate-800 mb-1">匯入 / 復原備份資料</h4>
+                    <p class="text-xs text-slate-500 mb-3">選擇先前備份的 JSON 檔案載入系統。</p>
+                    <input type="file" id="importFileInput" accept=".json" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                    <button onclick="importJSONData()" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        執行匯入覆蓋
+                    </button>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <div>
+                    <h4 class="text-sm font-bold text-rose-600 mb-1">重置為日新國小預設範例資料</h4>
+                    <p class="text-xs text-slate-500 mb-2">如需重新載入預設的日新國小輔導室範例資料，可點擊重置。</p>
+                    <button onclick="promptResetDemoData()" class="text-xs text-rose-600 border border-rose-200 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition">
+                        重置為預設範例資料
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // Guidance Office 4 Groups Meta Configurations
+        const GROUPS = {
+            director: { id: 'director', name: '輔導主任', color: 'indigo', bgClass: 'bg-indigo-50', borderClass: 'border-indigo-200', textClass: 'text-indigo-700', badgeBg: 'bg-indigo-600' },
+            special: { id: 'special', name: '特教組', color: 'purple', bgClass: 'bg-purple-50', borderClass: 'border-purple-200', textClass: 'text-purple-700', badgeBg: 'bg-purple-600' },
+            counseling: { id: 'counseling', name: '輔導組', color: 'emerald', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-200', textClass: 'text-emerald-700', badgeBg: 'bg-emerald-600' },
+            registration: { id: 'registration', name: '資註組', color: 'cyan', bgClass: 'bg-cyan-50', borderClass: 'border-cyan-200', textClass: 'text-cyan-700', badgeBg: 'bg-cyan-600' }
+        };
+
+        // Rixin Elementary School Default Data
+        const DEFAULT_STATE = {
+            currentWeekId: '113-1-8',
+            selectedRole: 'all',
+            activeTab: 'announcements',
+            weeks: [
+                { id: '113-1-7', year: 113, semester: 1, week: 7, title: '第7週 - 評鑑準備與資料抽查週', startDate: '2026-10-12', endDate: '2026-10-18', notes: '備齊校內特教與輔導訪視檢核資料' },
+                { id: '113-1-8', year: 113, semester: 1, week: 8, title: '第8週 - 特教宣導與性平教育週', startDate: '2026-10-19', endDate: '2026-10-25', notes: '召開特推會，發放性平宣導學習單' },
+                { id: '113-1-9', year: 113, semester: 1, week: 9, title: '第9週 - 輔導紀錄簿與心理測驗初檢週', startDate: '2026-10-26', endDate: '2026-11-01', notes: '請導師送交心理測驗結果與紀錄簿' }
+            ],
+            announcements: [
+                {
+                    id: 'ann-1',
+                    weekId: '113-1-8',
+                    groupId: 'director',
+                    title: '113學年度第一學期 臺北市特教業務評鑑整備提醒',
+                    target: '全校教職員',
+                    priority: '緊急',
+                    status: '進行中',
+                    eventDate: '2026-10-22',
+                    eventTime: '08:40 - 12:00',
+                    content: '教育局訪視評鑑小組將於本週四進行輔導與特教業務實地視導，請特教組、輔導組與各學年代表備妥近三年檢核資料。',
+                    updatedAt: '2026-10-19 09:00'
+                },
+                {
+                    id: 'ann-2',
+                    weekId: '113-1-8',
+                    groupId: 'special',
+                    title: '10/21(三) 召開特教推行委員會(特推會)第二次會議',
+                    target: '特教教師',
+                    priority: '重要',
+                    status: '進行中',
+                    eventDate: '2026-10-21',
+                    eventTime: '12:30 - 13:30',
+                    content: '請特推會委員及各年級導師代表準時至校史室參會，審議下學期特教助理員申請與IEP追蹤計畫。',
+                    updatedAt: '2026-10-19 10:15'
+                },
+                {
+                    id: 'ann-3',
+                    weekId: '113-1-8',
+                    groupId: 'counseling',
+                    title: '辦理全校「性別平等教育主題宣導」有獎徵答',
+                    target: '全校學生',
+                    priority: '普通',
+                    status: '進行中',
+                    eventDate: '2026-10-23',
+                    eventTime: '晨會時間',
+                    content: '請各班導師協助發放學習單，填妥後於 10/25(五) 前投入輔導室投獎箱，將於下週一公開抽獎。',
+                    updatedAt: '2026-10-19 11:30'
+                },
+                {
+                    id: 'ann-4',
+                    weekId: '113-1-8',
+                    groupId: 'registration',
+                    title: '四、六年級學生心理測驗登錄與紙本輔導紀錄簿送核',
+                    target: '各班導師',
+                    priority: '重要',
+                    status: '進行中',
+                    eventDate: '2026-10-23',
+                    eventTime: '16:00 前',
+                    content: '請導師登入校務行政系統確認測驗結果，並於本週五前將紙本輔導紀錄簿送至資註組完成初檢與核章。',
+                    updatedAt: '2026-10-19 14:00'
+                }
+            ],
+            proposals: [
+                {
+                    id: 'prop-1',
+                    weekId: '113-1-8',
+                    groupId: 'special',
+                    subject: '擬辦理「日新國小 113學年度身心障礙學生個別化教育計畫 (IEP) 檢討會」案',
+                    description: '為檢視學習輔導成效，規劃於第 12 週邀集外聘專家、特教團隊與學生家長召開檢討會。',
+                    proposedAction: '奉核後由特教組發函通知專家團隊與家長，並簽請發給專家出席費與公假排代。',
+                    priority: '重要',
+                    status: '報局核備中',
+                    resolution: '原則通過，請注意時間避開期末定期考查，並報請教育局核備。',
+                    updatedAt: '2026-10-19 15:00'
+                },
+                {
+                    id: 'prop-2',
+                    weekId: '113-1-8',
+                    groupId: 'counseling',
+                    subject: '申請辦理「日新國小高關懷學生校外生態體驗輔導活動」實施計畫',
+                    description: '針對校內需正向行為支持之高關懷學生，安排一日農場生態體驗活動，建立同儕輔導支持網絡。',
+                    proposedAction: '擬向教育局申請專案補助新臺幣 28,000 元，並簽請派隨隊教師公假排代。',
+                    priority: '普通',
+                    status: '執行中',
+                    resolution: '照案通過，請輔導組確實宣導並完成家長同意書徵求。',
+                    updatedAt: '2026-10-19 16:20'
+                },
+                {
+                    id: 'prop-3',
+                    weekId: '113-1-8',
+                    groupId: 'registration',
+                    subject: '建請採購續約輔導室心理測驗線上授權與資安備份升級案',
+                    description: '輔導室測驗系統現有授權即將到期，且學生個資防護設備需增購外接備份硬體。',
+                    proposedAction: '擬採購一年期系統授權與資安硬體，經費由輔導室相關業務費項下支應。',
+                    priority: '普通',
+                    status: '主管會議討論中',
+                    resolution: '請資註組補充兩家以上廠商報價單後再行簽核。',
+                    updatedAt: '2026-10-20 09:10'
+                }
+            ]
+        };
+
+        let appData = loadStorageData();
+
+        // Load data from LocalStorage
+        function loadStorageData() {
+            try {
+                const stored = localStorage.getItem('rixin_guidance_app_data');
+                if (stored) {
+                    return JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error("LocalStorage error", e);
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        }
+
+        // Save data to LocalStorage
+        function saveStorageData() {
+            try {
+                localStorage.setItem('rixin_guidance_app_data', JSON.stringify(appData));
+            } catch (e) {
+                console.error("LocalStorage save error", e);
+                showToast("儲存失敗", "error");
+            }
+        }
+
+        // Initialize Application
+        function initApp() {
+            renderHeaderWeeks();
+            updateCurrentWeekDisplay();
+            renderRoleButtons();
+            switchTab(appData.activeTab || 'announcements', false);
+            lucide.createIcons();
+        }
+
+        // Render Weeks in Header Dropdown
+        function renderHeaderWeeks() {
+            const select = document.getElementById('weekSelect');
+            select.innerHTML = '';
+            
+            if (appData.weeks.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = '無可用週次';
+                select.appendChild(opt);
+                return;
+            }
+
+            appData.weeks.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.id;
+                const label = w.title ? `${w.title}` : `${w.year}學年度 第${w.semester}學期 第${w.week}週`;
+                opt.textContent = label;
+                if (w.id === appData.currentWeekId) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        // Update Week Info Display
+        function updateCurrentWeekDisplay() {
+            const currentWeek = appData.weeks.find(w => w.id === appData.currentWeekId) || appData.weeks[0];
+            if (currentWeek) {
+                const tagText = currentWeek.title ? currentWeek.title : `${currentWeek.year}學年度 第${currentWeek.semester}學期 第${currentWeek.week}週`;
+                document.getElementById('currentWeekTag').textContent = tagText;
+                document.getElementById('currentDateRange').textContent = `${currentWeek.startDate} ~ ${currentWeek.endDate}`;
+
+                const notesBadge = document.getElementById('currentWeekNotesBadge');
+                const notesText = document.getElementById('currentWeekNotesText');
+                if (currentWeek.notes) {
+                    notesText.textContent = currentWeek.notes;
+                    notesBadge.classList.remove('hidden');
+                    notesBadge.classList.add('md:inline-flex');
+                } else {
+                    notesBadge.classList.add('hidden');
+                    notesBadge.classList.remove('md:inline-flex');
+                }
+            } else {
+                document.getElementById('currentWeekTag').textContent = "未選擇週次";
+                document.getElementById('currentDateRange').textContent = "—";
+                document.getElementById('currentWeekNotesBadge').classList.add('hidden');
+            }
+        }
+
+        // Handle Change Week Dropdown
+        function handleWeekSelect(weekId) {
+            if (!weekId) return;
+            appData.currentWeekId = weekId;
+            saveStorageData();
+            updateCurrentWeekDisplay();
+            renderActiveTabContent();
+        }
+
+        // Change Week Prev/Next
+        function changeWeek(delta) {
+            const idx = appData.weeks.findIndex(w => w.id === appData.currentWeekId);
+            if (idx !== -1) {
+                const newIdx = idx + delta;
+                if (newIdx >= 0 && newIdx < appData.weeks.length) {
+                    appData.currentWeekId = appData.weeks[newIdx].id;
+                    document.getElementById('weekSelect').value = appData.currentWeekId;
+                    saveStorageData();
+                    updateCurrentWeekDisplay();
+                    renderActiveTabContent();
+                } else {
+                    showToast("無更多週次，點擊「新增週次」按鈕建立新週次！", "info");
+                }
+            }
+        }
+
+        // Render Role Switcher Buttons
+        function renderRoleButtons() {
+            const roles = ['all', 'director', 'special', 'counseling', 'registration'];
+            roles.forEach(role => {
+                const btn = document.getElementById(`roleBtn-${role}`);
+                if (!btn) return;
+
+                if (appData.selectedRole === role) {
+                    btn.className = "role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap bg-slate-900 text-white shadow-sm border-slate-900";
+                } else {
+                    btn.className = "role-btn px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200";
+                }
+            });
+        }
+
+        // Set Role Filter
+        function setRole(role) {
+            appData.selectedRole = role;
+            saveStorageData();
+            renderRoleButtons();
+            renderActiveTabContent();
+        }
+
+        // Switch Tab
+        function switchTab(tabId, save = true) {
+            appData.activeTab = tabId;
+            if (save) saveStorageData();
+
+            ['announcements', 'proposals', 'report'].forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                const content = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    btn.className = "tab-btn pb-3 px-1 text-sm font-bold border-b-2 border-rixinRed-700 text-rixinRed-700 transition flex items-center gap-2";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "tab-btn pb-3 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition flex items-center gap-2";
+                    content.classList.add('hidden');
+                }
+            });
+
+            renderActiveTabContent();
+        }
+
+        // Render Active Tab Content
+        function renderActiveTabContent() {
+            updateBadges();
+            if (appData.activeTab === 'announcements') {
+                renderAnnouncements();
+            } else if (appData.activeTab === 'proposals') {
+                renderProposals();
+            } else if (appData.activeTab === 'report') {
+                renderReport();
+            }
+            lucide.createIcons();
+        }
+
+        // Update Badges Count
+        function updateBadges() {
+            const announcements = getFilteredAnnouncements();
+            const proposals = getFilteredProposals();
+            document.getElementById('announcementBadge').textContent = announcements.length;
+            document.getElementById('proposalBadge').textContent = proposals.length;
+        }
+
+        // Filter Announcements
+        function getFilteredAnnouncements() {
+            return appData.announcements.filter(a => {
+                if (a.weekId !== appData.currentWeekId) return false;
+                if (appData.selectedRole !== 'all' && a.groupId !== appData.selectedRole) return false;
+                
+                const q = (document.getElementById('announcementSearch')?.value || '').toLowerCase();
+                if (q && !a.title.toLowerCase().includes(q) && !a.content.toLowerCase().includes(q)) return false;
+
+                const targetF = document.getElementById('announcementTargetFilter')?.value || 'all';
+                if (targetF !== 'all' && a.target !== targetF) return false;
+
+                const priorityF = document.getElementById('announcementPriorityFilter')?.value || 'all';
+                if (priorityF !== 'all' && a.priority !== priorityF) return false;
+
+                const statusF = document.getElementById('announcementStatusFilter')?.value || 'all';
+                if (statusF !== 'all' && (a.status || '進行中') !== statusF) return false;
+
+                return true;
+            });
+        }
+
+        // Filter Proposals
+        function getFilteredProposals() {
+            return appData.proposals.filter(p => {
+                if (p.weekId !== appData.currentWeekId) return false;
+                if (appData.selectedRole !== 'all' && p.groupId !== appData.selectedRole) return false;
+
+                const q = (document.getElementById('proposalSearch')?.value || '').toLowerCase();
+                if (q && !p.subject.toLowerCase().includes(q) && !p.description.toLowerCase().includes(q) && !p.proposedAction.toLowerCase().includes(q)) return false;
+
+                const statusF = document.getElementById('proposalStatusFilter')?.value || 'all';
+                if (statusF !== 'all' && p.status !== statusF) return false;
+
+                return true;
+            });
+        }
+
+        // ==================== EDIT & DELETE WEEK ====================
+        function openEditWeekModal(weekId) {
+            const week = appData.weeks.find(w => w.id === weekId);
+            if (!week) return;
+
+            document.getElementById('editWeekTargetId').value = week.id;
+            document.getElementById('editWeekYear').value = week.year;
+            document.getElementById('editWeekSemester').value = week.semester;
+            document.getElementById('editWeekNum').value = week.week;
+            document.getElementById('editWeekTitle').value = week.title || '';
+            document.getElementById('editWeekStartDate').value = week.startDate;
+            document.getElementById('editWeekEndDate').value = week.endDate;
+            document.getElementById('editWeekNotes').value = week.notes || '';
+
+            openModal('editWeekModal');
+        }
+
+        function saveWeekInfo(e) {
+            e.preventDefault();
+            const targetId = document.getElementById('editWeekTargetId').value;
+            const week = appData.weeks.find(w => w.id === targetId);
+            if (!week) return;
+
+            const year = parseInt(document.getElementById('editWeekYear').value);
+            const semester = parseInt(document.getElementById('editWeekSemester').value);
+            const weekNum = parseInt(document.getElementById('editWeekNum').value);
+            const title = document.getElementById('editWeekTitle').value.trim();
+            const startDate = document.getElementById('editWeekStartDate').value;
+            const endDate = document.getElementById('editWeekEndDate').value;
+            const notes = document.getElementById('editWeekNotes').value.trim();
+
+            const newId = `${year}-${semester}-${weekNum}`;
+
+            if (newId !== targetId && appData.weeks.some(w => w.id === newId)) {
+                showToast("該週次編號已存在，請確認學年度與週次！", "error");
+                return;
+            }
+
+            week.year = year;
+            week.semester = semester;
+            week.week = weekNum;
+            week.title = title || `第${weekNum}週`;
+            week.startDate = startDate;
+            week.endDate = endDate;
+            week.notes = notes;
+
+            if (newId !== targetId) {
+                week.id = newId;
+                appData.announcements.forEach(a => { if (a.weekId === targetId) a.weekId = newId; });
+                appData.proposals.forEach(p => { if (p.weekId === targetId) p.weekId = newId; });
+                if (appData.currentWeekId === targetId) {
+                    appData.currentWeekId = newId;
+                }
+            }
+
+            appData.weeks.sort((a,b) => (a.year*1000 + a.semester*100 + a.week) - (b.year*1000 + b.semester*100 + b.week));
+
+            saveStorageData();
+            closeModal('editWeekModal');
+            renderHeaderWeeks();
+            updateCurrentWeekDisplay();
+            renderActiveTabContent();
+            if (!document.getElementById('weekListModal').classList.contains('hidden')) {
+                renderWeekTable();
+            }
+            showToast("當週行事曆資訊已成功更新！");
+        }
+
+        function promptDeleteWeek(weekId) {
+            const week = appData.weeks.find(w => w.id === weekId);
+            if (!week) return;
+
+            const annCount = appData.announcements.filter(a => a.weekId === weekId).length;
+            const propCount = appData.proposals.filter(p => p.weekId === weekId).length;
+            const weekLabel = week.title || `${week.year}學年度第${week.semester}學期 第${week.week}週`;
+
+            let detailHtml = `
+                <div class="font-bold text-slate-700">準備刪除：${escapeHtml(weekLabel)} (${week.startDate} ~ ${week.endDate})</div>
+                <div class="text-rose-600 font-semibold mt-1">⚠️ 關聯資料：該週次包含</div>
+                <ul class="list-disc list-inside text-slate-600 mt-0.5">
+                    <li>${annCount} 筆公告事項</li>
+                    <li>${propCount} 筆主管會議提案</li>
+                </ul>
+                <div class="text-slate-500 mt-1 italic">刪除週次後，上述事項亦將一併刪除。</div>
+            `;
+
+            showConfirmModal({
+                title: '刪除當週行事曆確認',
+                message: `確定要刪除日新國小「${escapeHtml(weekLabel)}」的行事曆嗎？此操作無法復原。`,
+                detailsHtml: detailHtml,
+                okText: '確認刪除週次',
+                onConfirm: () => executeDeleteWeek(weekId)
+            });
+        }
+
+        function executeDeleteWeek(weekId) {
+            appData.weeks = appData.weeks.filter(w => w.id !== weekId);
+            appData.announcements = appData.announcements.filter(a => a.weekId !== weekId);
+            appData.proposals = appData.proposals.filter(p => p.weekId !== weekId);
+
+            if (appData.weeks.length === 0) {
+                const fallbackWeek = {
+                    id: '113-1-1',
+                    year: 113,
+                    semester: 1,
+                    week: 1,
+                    title: '第1週 - 開學週',
+                    startDate: new Date().toISOString().slice(0,10),
+                    endDate: new Date().toISOString().slice(0,10),
+                    notes: '新學期開始'
+                };
+                appData.weeks.push(fallbackWeek);
+                appData.currentWeekId = '113-1-1';
+                showToast("已無剩餘週次，系統自動為您建立「第1週」！", "info");
+            } else if (appData.currentWeekId === weekId) {
+                appData.currentWeekId = appData.weeks[0].id;
+            }
+
+            saveStorageData();
+            renderHeaderWeeks();
+            updateCurrentWeekDisplay();
+            renderActiveTabContent();
+            if (!document.getElementById('weekListModal').classList.contains('hidden')) {
+                renderWeekTable();
+            }
+            showToast("已成功刪除該週次", "success");
+        }
+
+        function openWeekListModal() {
+            renderWeekTable();
+            openModal('weekListModal');
+        }
+
+        function renderWeekTable() {
+            const tbody = document.getElementById('weekTableBody');
+            tbody.innerHTML = '';
+
+            if (appData.weeks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無週次紀錄</td></tr>`;
+                return;
+            }
+
+            appData.weeks.forEach(w => {
+                const annCount = appData.announcements.filter(a => a.weekId === w.id).length;
+                const propCount = appData.proposals.filter(p => p.weekId === w.id).length;
+                const isCurrent = (w.id === appData.currentWeekId);
+
+                const tr = document.createElement('tr');
+                tr.className = isCurrent ? 'bg-rixinRed-50/60 font-medium' : 'hover:bg-slate-50';
+
+                tr.innerHTML = `
+                    <td class="p-2.5">
+                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                            ${isCurrent ? '<span class="w-2 h-2 rounded-full bg-rixinRed-600"></span>' : ''}
+                            ${escapeHtml(w.title || `第${w.week}週`)}
+                        </div>
+                        <div class="text-[10px] text-slate-400">${w.year}學年 第${w.semester}學期</div>
+                    </td>
+                    <td class="p-2.5 whitespace-nowrap text-slate-600">${w.startDate} ~ ${w.endDate}</td>
+                    <td class="p-2.5 text-slate-600 max-w-[180px] truncate" title="${escapeHtml(w.notes || '')}">${escapeHtml(w.notes || '—')}</td>
+                    <td class="p-2.5 text-center font-bold text-indigo-600">${annCount}</td>
+                    <td class="p-2.5 text-center font-bold text-emerald-600">${propCount}</td>
+                    <td class="p-2.5 text-center whitespace-nowrap">
+                        <button onclick="closeModal('weekListModal'); openEditWeekModal('${w.id}')" class="p-1 text-slate-500 hover:text-indigo-600 transition mr-1" title="編輯">
+                            <i data-lucide="pencil" class="w-4 h-4 inline"></i>
+                        </button>
+                        <button onclick="promptDeleteWeek('${w.id}')" class="p-1 text-slate-500 hover:text-rose-600 transition" title="刪除">
+                            <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        // ==================== TAB 1: RENDER ANNOUNCEMENTS ====================
+        function renderAnnouncements() {
+            const list = document.getElementById('announcementList');
+            const items = getFilteredAnnouncements();
+            updateBadges();
+
+            if (items.length === 0) {
+                list.innerHTML = `
+                    <div class="bg-white rounded-xl p-12 text-center border border-slate-200">
+                        <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+                        <p class="text-slate-500 text-sm font-medium">日新國小輔導室 本週尚無符合條件的公告事項</p>
+                        <p class="text-slate-400 text-xs mt-1">點擊右上方「新增公告事項」開始填寫公告內容</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            items.forEach(a => {
+                const group = GROUPS[a.groupId] || GROUPS.director;
+                
+                let priorityClass = 'bg-slate-100 text-slate-600 border-slate-200';
+                if (a.priority === '緊急') priorityClass = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
+                if (a.priority === '重要') priorityClass = 'bg-amber-50 text-amber-700 border-amber-200 font-semibold';
+
+                let statusBadge = 'bg-slate-100 text-slate-600 border-slate-200';
+                if (a.status === '已完成') statusBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold';
+                if (a.status === '進行中') statusBadge = 'bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold';
+                if (a.status === '延期') statusBadge = 'bg-amber-50 text-amber-800 border-amber-200 font-semibold';
+                if (a.status === '取消') statusBadge = 'bg-rose-50 text-rose-700 border-rose-200 font-semibold';
+
+                html += `
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-1.5 ${group.badgeBg}"></div>
+
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3 mb-3 pt-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-bold ${group.bgClass} ${group.textClass} border ${group.borderClass}">
+                                    ${group.name}
+                                </span>
+                                <span class="px-2 py-0.5 rounded text-xs border ${priorityClass}">
+                                    ${a.priority}
+                                </span>
+                                <span class="px-2 py-0.5 rounded text-xs border ${statusBadge}">
+                                    狀態：${a.status || '進行中'}
+                                </span>
+                                <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
+                                    <i data-lucide="users" class="w-3 h-3"></i>
+                                    ${a.target}
+                                </span>
+                                ${a.eventDate ? `
+                                <span class="text-xs text-slate-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
+                                    <i data-lucide="calendar" class="w-3 h-3 text-indigo-600"></i>
+                                    ${a.eventDate}
+                                </span>` : ''}
+                                ${a.eventTime ? `
+                                <span class="text-xs text-slate-700 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded flex items-center gap-1 font-medium">
+                                    <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i>
+                                    ${a.eventTime}
+                                </span>` : ''}
+                            </div>
+
+                            <div class="flex items-center gap-2 self-end md:self-auto no-print">
+                                <button onclick="editAnnouncement('${a.id}')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition" title="編輯">
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="promptDeleteAnnouncement('${a.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition" title="刪除">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <h3 class="text-base font-bold text-slate-800 mb-2 leading-snug">${escapeHtml(a.title)}</h3>
+                        <p class="text-sm text-slate-600 whitespace-pre-line leading-relaxed bg-slate-50 p-3.5 rounded-lg border border-slate-100">${escapeHtml(a.content)}</p>
+
+                        <div class="mt-3 flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-100">
+                            <span>更新時間：${a.updatedAt || '—'}</span>
+                            <button onclick="copySingleItem('【日新國小輔導室-${group.name}】${a.title}\\n對象：${a.target}${a.eventDate ? '\\n日期：' + a.eventDate : ''}${a.eventTime ? '\\n時間：' + a.eventTime : ''}\\n內容：${a.content}')" class="text-slate-500 hover:text-indigo-600 flex items-center gap-1 no-print">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                複製單項
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // ==================== TAB 2: RENDER PROPOSALS ====================
+        function renderProposals() {
+            const list = document.getElementById('proposalList');
+            const items = getFilteredProposals();
+            updateBadges();
+
+            if (items.length === 0) {
+                list.innerHTML = `
+                    <div class="bg-white rounded-xl p-12 text-center border border-slate-200">
+                        <i data-lucide="folder-open" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+                        <p class="text-slate-500 text-sm font-medium">日新國小輔導室 本週尚無主管會議提案</p>
+                        <p class="text-slate-400 text-xs mt-1">點擊右上方「新增主管會議提案」開始填寫</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            items.forEach((p, idx) => {
+                const group = GROUPS[p.groupId] || GROUPS.director;
+
+                let statusBadge = 'bg-slate-100 text-slate-700 border-slate-300';
+                if (p.status === '已結案') statusBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold';
+                if (p.status === '執行中') statusBadge = 'bg-indigo-100 text-indigo-800 border-indigo-300 font-bold';
+                if (p.status === '報局核備中') statusBadge = 'bg-teal-100 text-teal-800 border-teal-300 font-bold';
+                if (p.status === '主管會議討論中') statusBadge = 'bg-amber-100 text-amber-800 border-amber-300 font-bold';
+                if (p.status === '研擬中') statusBadge = 'bg-slate-100 text-slate-800 border-slate-300 font-bold';
+
+                html += `
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-1.5 ${group.badgeBg}"></div>
+
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3 mb-3 pt-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-bold ${group.bgClass} ${group.textClass} border ${group.borderClass}">
+                                    ${group.name} 提案 #${idx + 1}
+                                </span>
+                                <span class="px-2.5 py-1 rounded-md text-xs border ${statusBadge}">
+                                    執行狀態：${p.status}
+                                </span>
+                                ${p.priority ? `
+                                <span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600 border border-slate-200">
+                                    優先度：${p.priority}
+                                </span>` : ''}
+                            </div>
+
+                            <div class="flex items-center gap-2 self-end md:self-auto no-print">
+                                <button onclick="editProposal('${p.id}')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition" title="編輯提案">
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="promptDeleteProposal('${p.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition" title="刪除提案">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <h3 class="text-base font-bold text-slate-800 mb-3 leading-snug">案由：${escapeHtml(p.subject)}</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs mb-4">
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <span class="font-bold text-slate-700 block mb-1">【說明】</span>
+                                <p class="text-slate-600 whitespace-pre-line leading-relaxed">${escapeHtml(p.description)}</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <span class="font-bold text-slate-700 block mb-1">【擬辦方式】</span>
+                                <p class="text-slate-600 whitespace-pre-line leading-relaxed">${escapeHtml(p.proposedAction)}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50/70 rounded-lg p-3.5 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex-1">
+                                <span class="text-xs font-bold text-indigo-900 block mb-0.5">主管會議決議與指示：</span>
+                                <p class="text-xs text-indigo-950 font-medium whitespace-pre-line">${p.resolution ? escapeHtml(p.resolution) : '<span class="text-slate-400 italic">尚無會議決議紀錄（點擊右側按鈕進行決議登記）</span>'}</p>
+                            </div>
+                            <button onclick="editProposal('${p.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-md font-medium shrink-0 no-print transition flex items-center justify-center gap-1">
+                                <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+                                登記會議決議
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // ==================== TAB 3: RENDER REPORT & PRINT ====================
+        function renderReport() {
+            const paper = document.getElementById('reportPaper');
+            const reportType = document.querySelector('input[name="reportType"]:checked')?.value || 'full';
+            const currentWeek = appData.weeks.find(w => w.id === appData.currentWeekId) || appData.weeks[0];
+
+            const announcements = appData.announcements.filter(a => a.weekId === appData.currentWeekId);
+            const proposals = appData.proposals.filter(p => p.weekId === appData.currentWeekId);
+
+            const weekTitle = currentWeek.title ? currentWeek.title : `${currentWeek.year}學年度 第${currentWeek.semester}學期 第${currentWeek.week}週`;
+
+            let html = `
+                <!-- Paper Official Header -->
+                <div class="text-center border-b-2 border-slate-900 pb-4 mb-6">
+                    <div class="text-xs font-bold text-slate-500 tracking-widest mb-1">臺北市大同區日新國民小學</div>
+                    <h1 class="text-2xl font-black tracking-wide text-slate-900">輔導室每週處室公告與主管會議決議表</h1>
+                    <p class="text-sm font-semibold text-slate-600 mt-1.5">
+                        ${escapeHtml(weekTitle)} （${currentWeek.startDate} ～ ${currentWeek.endDate}）
+                    </p>
+                    ${currentWeek.notes ? `<p class="text-xs font-medium text-amber-800 bg-amber-50 inline-block px-3 py-1 rounded border border-amber-200 mt-2">當週處室重點：${escapeHtml(currentWeek.notes)}</p>` : ''}
+                </div>
+            `;
+
+            if (reportType === 'full' || reportType === 'executive') {
+                
+                // Section 1: Weekly Announcements
+                if (reportType === 'full') {
+                    html += `
+                        <div class="mb-8">
+                            <h2 class="text-base font-bold text-slate-900 mb-3 border-l-4 border-rixinRed-700 pl-2 flex items-center gap-2">
+                                壹、每週輔導室須公告與轉知事項
+                            </h2>
+                    `;
+
+                    if (announcements.length === 0) {
+                        html += `<p class="text-xs text-slate-500 italic pl-3">本週無公告事項。</p>`;
+                    } else {
+                        Object.keys(GROUPS).forEach(groupId => {
+                            const groupAnns = announcements.filter(a => a.groupId === groupId);
+                            if (groupAnns.length > 0) {
+                                html += `
+                                    <div class="mb-4 pl-2">
+                                        <h3 class="text-sm font-bold text-slate-800 mb-2 underline underline-offset-4 decoration-rixinRed-500">【${GROUPS[groupId].name}】</h3>
+                                        <ol class="list-decimal list-inside space-y-2 text-xs text-slate-700">
+                                `;
+                                groupAnns.forEach(a => {
+                                    const dateTimeStr = [a.eventDate ? `📅 ${a.eventDate}` : '', a.eventTime ? `⏰ ${a.eventTime}` : ''].filter(Boolean).join(' ');
+                                    html += `
+                                        <li class="leading-relaxed">
+                                            <span class="font-bold">[對象：${a.target}]</span> 
+                                            ${dateTimeStr ? `<span class="inline-block px-1.5 py-0.5 bg-slate-100 rounded font-semibold mr-1">${dateTimeStr}</span>` : ''}
+                                            <span class="font-bold text-slate-900">${escapeHtml(a.title)}</span>：
+                                            <span class="text-slate-600">${escapeHtml(a.content)}</span>
+                                        </li>
+                                    `;
+                                });
+                                html += `</ol></div>`;
+                            }
+                        });
+                    }
+                    html += `</div>`;
+                }
+
+                // Section 2: Executive Meeting Proposals
+                html += `
+                    <div class="mb-8">
+                        <h2 class="text-base font-bold text-slate-900 mb-3 border-l-4 border-rixinRed-700 pl-2 flex items-center gap-2">
+                            ${reportType === 'full' ? '貳' : '壹'}、提請主管會報討論與決議事項
+                        </h2>
+                `;
+
+                if (proposals.length === 0) {
+                    html += `<p class="text-xs text-slate-500 italic pl-3">本週無主管會議提案。</p>`;
+                } else {
+                    html += `
+                        <table class="w-full text-xs text-left text-slate-700 border-collapse border border-slate-800">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-900 border-b border-slate-800">
+                                    <th class="border border-slate-800 p-2 text-center w-10">項次</th>
+                                    <th class="border border-slate-800 p-2 w-16">提案組別</th>
+                                    <th class="border border-slate-800 p-2">案由與說明</th>
+                                    <th class="border border-slate-800 p-2">擬辦方式</th>
+                                    <th class="border border-slate-800 p-2 w-16 text-center">追蹤狀態</th>
+                                    <th class="border border-slate-800 p-2">主管會議決議與指示</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    proposals.forEach((p, idx) => {
+                        const group = GROUPS[p.groupId] || GROUPS.director;
+                        html += `
+                            <tr class="border-b border-slate-800">
+                                <td class="border border-slate-800 p-2 text-center font-bold">${idx + 1}</td>
+                                <td class="border border-slate-800 p-2 font-bold">${group.name}</td>
+                                <td class="border border-slate-800 p-2 leading-relaxed">
+                                    <div class="font-bold mb-1">${escapeHtml(p.subject)}</div>
+                                    <div class="text-slate-600">${escapeHtml(p.description)}</div>
+                                </td>
+                                <td class="border border-slate-800 p-2 leading-relaxed">${escapeHtml(p.proposedAction)}</td>
+                                <td class="border border-slate-800 p-2 text-center font-bold">${p.status}</td>
+                                <td class="border border-slate-800 p-2 leading-relaxed font-medium">${p.resolution ? escapeHtml(p.resolution) : '—'}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table>`;
+                }
+
+                html += `</div>`;
+            }
+
+            // Paper Official Signature Block
+            html += `
+                <div class="mt-12 pt-6 border-t border-slate-400 grid grid-cols-3 gap-4 text-center text-xs text-slate-800 font-bold">
+                    <div>紀錄 / 擬辦：_________________</div>
+                    <div>輔導主任：_________________</div>
+                    <div>校長批示：_________________</div>
+                </div>
+            `;
+
+            paper.innerHTML = html;
+        }
+
+        // Copy Text formatted for LINE / Chat groups
+        function copyFormattedText() {
+            const currentWeek = appData.weeks.find(w => w.id === appData.currentWeekId) || appData.weeks[0];
+            const announcements = appData.announcements.filter(a => a.weekId === appData.currentWeekId);
+            const proposals = appData.proposals.filter(p => p.weekId === appData.currentWeekId);
+
+            const weekTitle = currentWeek.title ? currentWeek.title : `${currentWeek.year}學年度 第${currentWeek.semester}學期 第${currentWeek.week}週`;
+
+            let text = `🏫【臺北市日新國小 輔導室處室每週公告】\n`;
+            text += `📅 週次：${weekTitle} (${currentWeek.startDate} ~ ${currentWeek.endDate})\n`;
+            if (currentWeek.notes) text += `📌 當週重點：${currentWeek.notes}\n`;
+            text += `====================================\n\n`;
+
+            text += `📢【每週須公告與轉知事項】\n`;
+            if (announcements.length === 0) {
+                text += `(本週無公告事項)\n`;
+            } else {
+                announcements.forEach((a, i) => {
+                    const gName = GROUPS[a.groupId]?.name || '';
+                    text += `${i + 1}. [${gName}] ${a.title}\n`;
+                    text += `   • 對象：${a.target} (狀態: ${a.status || '進行中'})\n`;
+                    if (a.eventDate || a.eventTime) {
+                        text += `   • 時間：${a.eventDate || ''} ${a.eventTime || ''}\n`;
+                    }
+                    text += `   • 內容：${a.content}\n\n`;
+                });
+            }
+
+            text += `====================================\n`;
+            text += `💼【主管會議提案與決議事項】\n`;
+            if (proposals.length === 0) {
+                text += `(本週無提案)\n`;
+            } else {
+                proposals.forEach((p, i) => {
+                    const gName = GROUPS[p.groupId]?.name || '';
+                    text += `${i + 1}. [${gName}] 案由：${p.subject}\n`;
+                    text += `   • 追蹤狀態：${p.status}\n`;
+                    if (p.resolution) text += `   • 主管決議：${p.resolution}\n`;
+                    text += `\n`;
+                });
+            }
+
+            text += `====================================\n`;
+            text += `感謝日新團隊同仁的鼎力協助！祝教學與行政順心！`;
+
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("已成功複製日新國小輔導室廣播訊息至剪貼簿！", "success");
+            } catch (err) {
+                showToast("複製失敗，請手動複製", "error");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Single Item Copy
+        function copySingleItem(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("已複製單項內容！");
+            } catch (err) {
+                showToast("複製失敗", "error");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // ==================== ANNOUNCEMENT ACTIONS ====================
+        function openAnnouncementModal(data = null) {
+            document.getElementById('announcementForm').reset();
+            if (data) {
+                document.getElementById('announcementModalTitle').textContent = "編輯公告事項";
+                document.getElementById('announcementId').value = data.id;
+                document.getElementById('announcementGroup').value = data.groupId;
+                document.getElementById('announcementTitle').value = data.title;
+                document.getElementById('announcementTarget').value = data.target;
+                document.getElementById('announcementPriority').value = data.priority;
+                document.getElementById('announcementStatus').value = data.status || '進行中';
+                document.getElementById('announcementEventDate').value = data.eventDate || '';
+                document.getElementById('announcementEventTime').value = data.eventTime || '';
+                document.getElementById('announcementContent').value = data.content;
+            } else {
+                document.getElementById('announcementModalTitle').textContent = "新增公告事項";
+                document.getElementById('announcementId').value = '';
+                document.getElementById('announcementEventDate').value = '';
+                document.getElementById('announcementEventTime').value = '';
+                if (appData.selectedRole !== 'all') {
+                    document.getElementById('announcementGroup').value = appData.selectedRole;
+                }
+            }
+            openModal('announcementModal');
+        }
+
+        function saveAnnouncement(e) {
+            e.preventDefault();
+            const id = document.getElementById('announcementId').value;
+            const groupId = document.getElementById('announcementGroup').value;
+            const title = document.getElementById('announcementTitle').value.trim();
+            const target = document.getElementById('announcementTarget').value;
+            const priority = document.getElementById('announcementPriority').value;
+            const status = document.getElementById('announcementStatus').value;
+            const eventDate = document.getElementById('announcementEventDate').value;
+            const eventTime = document.getElementById('announcementEventTime').value.trim();
+            const content = document.getElementById('announcementContent').value.trim();
+
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            if (id) {
+                const idx = appData.announcements.findIndex(a => a.id === id);
+                if (idx !== -1) {
+                    appData.announcements[idx] = { ...appData.announcements[idx], groupId, title, target, priority, status, eventDate, eventTime, content, updatedAt: timeStr };
+                }
+            } else {
+                const newAnn = {
+                    id: 'ann-' + Date.now(),
+                    weekId: appData.currentWeekId,
+                    groupId,
+                    title,
+                    target,
+                    priority,
+                    status,
+                    eventDate,
+                    eventTime,
+                    content,
+                    updatedAt: timeStr
+                };
+                appData.announcements.unshift(newAnn);
+            }
+
+            saveStorageData();
+            closeModal('announcementModal');
+            renderAnnouncements();
+            showToast("公告事項已成功儲存！");
+        }
+
+        function editAnnouncement(id) {
+            const item = appData.announcements.find(a => a.id === id);
+            if (item) openAnnouncementModal(item);
+        }
+
+        function promptDeleteAnnouncement(id) {
+            const item = appData.announcements.find(a => a.id === id);
+            if (!item) return;
+
+            showConfirmModal({
+                title: '刪除公告確認',
+                message: `確定要刪除「${escapeHtml(item.title)}」嗎？`,
+                okText: '刪除公告',
+                onConfirm: () => {
+                    appData.announcements = appData.announcements.filter(a => a.id !== id);
+                    saveStorageData();
+                    renderAnnouncements();
+                    showToast("已刪除該筆公告事項");
+                }
+            });
+        }
+
+        // ==================== PROPOSAL ACTIONS ====================
+        function openProposalModal(data = null) {
+            document.getElementById('proposalForm').reset();
+            if (data) {
+                document.getElementById('proposalModalTitle').textContent = "編輯主管會議提案";
+                document.getElementById('proposalId').value = data.id;
+                document.getElementById('proposalGroup').value = data.groupId;
+                document.getElementById('proposalSubject').value = data.subject;
+                document.getElementById('proposalDescription').value = data.description;
+                document.getElementById('proposalAction').value = data.proposedAction;
+                document.getElementById('proposalPriority').value = data.priority || '普通';
+                document.getElementById('proposalStatus').value = data.status;
+                document.getElementById('proposalResolution').value = data.resolution || '';
+            } else {
+                document.getElementById('proposalModalTitle').textContent = "新增主管會議提案";
+                document.getElementById('proposalId').value = '';
+                if (appData.selectedRole !== 'all') {
+                    document.getElementById('proposalGroup').value = appData.selectedRole;
+                }
+            }
+            openModal('proposalModal');
+        }
+
+        function saveProposal(e) {
+            e.preventDefault();
+            const id = document.getElementById('proposalId').value;
+            const groupId = document.getElementById('proposalGroup').value;
+            const subject = document.getElementById('proposalSubject').value.trim();
+            const description = document.getElementById('proposalDescription').value.trim();
+            const proposedAction = document.getElementById('proposalAction').value.trim();
+            const priority = document.getElementById('proposalPriority').value;
+            const status = document.getElementById('proposalStatus').value;
+            const resolution = document.getElementById('proposalResolution').value.trim();
+
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            if (id) {
+                const idx = appData.proposals.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    appData.proposals[idx] = { ...appData.proposals[idx], groupId, subject, description, proposedAction, priority, status, resolution, updatedAt: timeStr };
+                }
+            } else {
+                const newProp = {
+                    id: 'prop-' + Date.now(),
+                    weekId: appData.currentWeekId,
+                    groupId,
+                    subject,
+                    description,
+                    proposedAction,
+                    priority,
+                    status,
+                    resolution,
+                    updatedAt: timeStr
+                };
+                appData.proposals.unshift(newProp);
+            }
+
+            saveStorageData();
+            closeModal('proposalModal');
+            renderProposals();
+            showToast("主管會議提案已成功儲存！");
+        }
+
+        function editProposal(id) {
+            const item = appData.proposals.find(p => p.id === id);
+            if (item) openProposalModal(item);
+        }
+
+        function promptDeleteProposal(id) {
+            const item = appData.proposals.find(p => p.id === id);
+            if (!item) return;
+
+            showConfirmModal({
+                title: '刪除提案確認',
+                message: `確定要刪除主管會議提案「${escapeHtml(item.subject)}」嗎？`,
+                okText: '刪除提案',
+                onConfirm: () => {
+                    appData.proposals = appData.proposals.filter(p => p.id !== id);
+                    saveStorageData();
+                    renderProposals();
+                    showToast("已刪除該筆提案");
+                }
+            });
+        }
+
+        // ==================== NEW WEEK ====================
+        function saveNewWeek(e) {
+            e.preventDefault();
+            const year = parseInt(document.getElementById('newYear').value);
+            const semester = parseInt(document.getElementById('newSemester').value);
+            const week = parseInt(document.getElementById('newWeekNum').value);
+            const customTitle = document.getElementById('newWeekTitle').value.trim();
+            const startDate = document.getElementById('newStartDate').value;
+            const endDate = document.getElementById('newEndDate').value;
+            const notes = document.getElementById('newWeekNotes').value.trim();
+
+            const weekId = `${year}-${semester}-${week}`;
+            if (appData.weeks.some(w => w.id === weekId)) {
+                showToast("該週次號碼已存在！", "error");
+                return;
+            }
+
+            const newWeekObj = {
+                id: weekId,
+                year,
+                semester,
+                week,
+                title: customTitle || `第${week}週`,
+                startDate,
+                endDate,
+                notes
+            };
+
+            appData.weeks.push(newWeekObj);
+            appData.weeks.sort((a,b) => (a.year*1000 + a.semester*100 + a.week) - (b.year*1000 + b.semester*100 + b.week));
+
+            appData.currentWeekId = weekId;
+            saveStorageData();
+            closeModal('addWeekModal');
+            renderHeaderWeeks();
+            updateCurrentWeekDisplay();
+            renderActiveTabContent();
+            showToast(`已建立並切換至「${newWeekObj.title}」！`);
+        }
+
+        // Reset demo data
+        function promptResetDemoData() {
+            showConfirmModal({
+                title: '重置日新國小範例資料',
+                message: '確定要重置為預設的日新國小輔導室範例資料嗎？現有資料將被覆蓋。',
+                okText: '重置資料',
+                onConfirm: () => {
+                    appData = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                    saveStorageData();
+                    closeModal('backupModal');
+                    initApp();
+                    showToast("已成功重置為日新國小預設範例資料！");
+                }
+            });
+        }
+
+        // ==================== JSON BACKUP / RESTORE ====================
+        function exportJSONData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `日新國小輔導室事項管理備份_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("備份 JSON 檔案已下載成功！");
+        }
+
+        function importJSONData() {
+            const fileInput = document.getElementById('importFileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                showToast("請先選擇要匯入的 JSON 檔案！", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && parsed.weeks && parsed.announcements) {
+                        appData = parsed;
+                        saveStorageData();
+                        closeModal('backupModal');
+                        initApp();
+                        showToast("已成功復原日新國小輔導室資料！", "success");
+                    } else {
+                        showToast("匯入檔案格式不符！", "error");
+                    }
+                } catch (err) {
+                    showToast("JSON 解析失敗，請檢查檔案內容", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==================== CONFIRM MODAL SYSTEM ====================
+        function showConfirmModal({ title, message, detailsHtml = '', okText = '確認', onConfirm }) {
+            document.getElementById('confirmModalTitle').innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i> ${escapeHtml(title)}`;
+            document.getElementById('confirmModalMessage').textContent = message;
+            
+            const detailsContainer = document.getElementById('confirmModalDetails');
+            if (detailsHtml) {
+                detailsContainer.innerHTML = detailsHtml;
+                detailsContainer.classList.remove('hidden');
+            } else {
+                detailsContainer.innerHTML = '';
+                detailsContainer.classList.add('hidden');
+            }
+
+            const okBtn = document.getElementById('confirmModalOkBtn');
+            okBtn.textContent = okText;
+            okBtn.onclick = function() {
+                closeModal('confirmModal');
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+
+            openModal('confirmModal');
+            lucide.createIcons();
+        }
+
+        // ==================== MODAL HELPERS ====================
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // ==================== TOAST NOTIFICATIONS ====================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bg = 'bg-slate-900 text-white';
+            if (type === 'success') bg = 'bg-emerald-600 text-white';
+            if (type === 'error') bg = 'bg-rose-600 text-white';
+
+            toast.className = `${bg} px-4 py-2.5 rounded-lg shadow-xl text-xs font-semibold flex items-center gap-2 transition transform translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i data-lucide="info" class="w-4 h-4 text-cyan-400"></i> ${escapeHtml(message)}`;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 200);
+            }, 3000);
+        }
+
+        // HTML Sanitizer
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // On DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+    </script>
+</body>
+</html>
