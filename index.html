@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臺北市日新國小 輔導室事項管理系統</title>
+    <title>臺北市日新國小 輔導室事項管理系統 (雲端即時多人協作版)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -63,7 +63,6 @@
     </script>
 
     <style>
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -107,13 +106,16 @@
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
 
+    <!-- Hidden JSON File Import Input -->
+    <input type="file" id="jsonFileInput" accept=".json" class="hidden" onchange="window.handleJsonFileImport(event)">
+
     <!-- Header Navigation -->
     <header class="bg-slate-900 text-white shadow-md no-print sticky top-0 z-30 border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 
                 <!-- School Emblem SVG Logo & Title -->
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="goToCurrentCalendarWeek()">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="goToCurrentCalendarWeek(true)">
                     <!-- Vector SVG Rixin School Emblem -->
                     <div class="shrink-0 p-1 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 flex items-center justify-center">
                         <svg viewBox="0 0 200 200" class="w-9 h-9">
@@ -153,9 +155,15 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="bg-rixinRed-700 text-white text-[10px] px-1.5 py-0.5 rounded font-bold tracking-wider">臺北市</span>
-                            <h1 class="font-bold text-lg leading-tight tracking-wide">日新國小 輔導室事項管理系統</h1>
+                            <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide">日新國小 輔導室事項管理系統</h1>
                         </div>
-                        <p class="text-xs text-slate-400">Taipei Municipal Rixin Elementary School Guidance Office System</p>
+                        <!-- Real-time Cloud Connection Status Badge -->
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <button onclick="openDiagnosticsModal()" id="syncStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-950 text-amber-400 border border-amber-800 transition hover:opacity-90">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                <span id="syncStatusText">雲端資料庫連線中...</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -163,7 +171,7 @@
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     
                     <!-- Quick Button: Jump to Real Current Week -->
-                    <button onclick="goToCurrentCalendarWeek()" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white text-xs px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 transition shadow-sm" title="自動比對今日日期切換至本週">
+                    <button onclick="goToCurrentCalendarWeek(true)" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white text-xs px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 transition shadow-sm" title="自動比對今日日期切換至本週">
                         <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
                         <span>📍 回到本週</span>
                     </button>
@@ -173,7 +181,7 @@
                         <button onclick="changeWeek(-1)" title="上一週" class="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
                             <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         </button>
-                        <select id="weekSelect" onchange="handleWeekSelect(this.value)" class="bg-transparent text-xs sm:text-sm text-white font-medium px-2 py-1 focus:outline-none cursor-pointer max-w-[150px] sm:max-w-xs truncate">
+                        <select id="weekSelect" onchange="handleWeekSelect(this.value)" class="bg-transparent text-xs sm:text-sm text-white font-medium px-2 py-1 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-xs truncate">
                             <!-- Populated dynamically -->
                         </select>
                         <button onclick="changeWeek(1)" title="下一週" class="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition">
@@ -185,17 +193,12 @@
                         <i data-lucide="calendar-plus" class="w-4 h-4 text-rixinRed-500"></i>
                         <span class="hidden sm:inline">新增週次</span>
                     </button>
-
-                    <button onclick="openModal('backupModal')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-2 rounded-lg border border-slate-700 flex items-center gap-1 transition" title="資料備份與還原">
-                        <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
-                        <span class="hidden md:inline">備份/還原</span>
-                    </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Sub-Header: Week Details & Section Role Switcher -->
+    <!-- Sub-Header: Week Details, Group Filters & JSON Backup -->
     <div class="bg-white border-b border-slate-200 shadow-sm no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             
@@ -205,7 +208,7 @@
                     <!-- Week Badge -->
                     <span id="currentWeekTagContainer" class="inline-flex items-center gap-1.5 px-3 py-1 bg-rixinRed-50 text-rixinRed-800 font-bold rounded-lg border border-rixinRed-200">
                         <i data-lucide="calendar" class="w-4 h-4 text-rixinRed-700"></i>
-                        <span id="currentWeekTag">讀取中...</span>
+                        <span id="currentWeekTag">載入中...</span>
                     </span>
 
                     <!-- Today Indicator Tag -->
@@ -226,19 +229,30 @@
                     </span>
                 </div>
 
-                <!-- Actions: Edit Week, Delete Week, Semester Management -->
+                <!-- Actions: Edit Week, Delete Week, Semester Management, Backup -->
                 <div class="flex items-center gap-2 flex-wrap shrink-0">
-                    <button onclick="openEditWeekModal(appData.currentWeekId)" class="bg-white hover:bg-slate-100 text-slate-700 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 font-medium flex items-center gap-1 transition shadow-sm">
+                    <button onclick="openEditWeekModal(state.currentWeekId)" class="bg-white hover:bg-slate-100 text-slate-700 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 font-medium flex items-center gap-1 transition shadow-sm">
                         <i data-lucide="pencil" class="w-3.5 h-3.5 text-indigo-600"></i>
                         編輯當週行事
                     </button>
-                    <button onclick="promptDeleteWeek(appData.currentWeekId)" class="bg-white hover:bg-rose-50 text-rose-600 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 hover:border-rose-200 font-medium flex items-center gap-1 transition shadow-sm">
+                    <button onclick="promptDeleteWeek(state.currentWeekId)" class="bg-white hover:bg-rose-50 text-rose-600 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 hover:border-rose-200 font-medium flex items-center gap-1 transition shadow-sm">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
                         刪除當週行事曆
                     </button>
                     <button onclick="openWeekListModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1.5 rounded-lg border border-indigo-200 font-semibold flex items-center gap-1 transition shadow-sm">
                         <i data-lucide="settings-2" class="w-3.5 h-3.5 text-indigo-600"></i>
                         週次總表管理
+                    </button>
+                    
+                    <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+                    <button onclick="exportJsonBackup()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-2 py-1.5 rounded-lg border border-slate-300 font-medium flex items-center gap-1 transition" title="備份資料為 JSON 檔案">
+                        <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
+                        匯出備份
+                    </button>
+                    <button onclick="triggerJsonImport()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-2 py-1.5 rounded-lg border border-slate-300 font-medium flex items-center gap-1 transition" title="從 JSON 檔案還原資料">
+                        <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-600"></i>
+                        匯入備份
                     </button>
                 </div>
             </div>
@@ -418,12 +432,40 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-auto no-print">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-            臺北市大同區日新國民小學 輔導室行政智慧管理系統 &copy; 2026 | 專為智慧校園處室協作設計
+            臺北市大同區日新國民小學 輔導室行政智慧管理系統 &copy; 2026 | 雲端即時多人協作版
         </div>
     </footer>
 
 
     <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal: Connection Diagnostics -->
+    <div id="diagnosticsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2 text-amber-400">
+                    <i data-lucide="activity" class="w-5 h-5"></i>
+                    雲端連線狀態與診斷
+                </h3>
+                <button onclick="closeModal('diagnosticsModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-3 text-xs text-slate-700">
+                <div id="diagStatusBox" class="p-3 rounded-lg border font-semibold">
+                    狀態檢查中...
+                </div>
+                <div class="space-y-1 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <div><strong>資料庫類型：</strong> Realtime Database (RTDB)</div>
+                    <div><strong>亞洲機房 URL：</strong> <span class="break-all text-slate-500">https://rixin-guidance-default-rtdb.asia-southeast1.firebasedatabase.app/</span></div>
+                </div>
+                <p id="diagHelpText" class="text-slate-500 leading-relaxed">如果連線成功，左上角會顯示「🟢 雲端連線中（多人即時協作）」，任何人在任何瀏覽器進行的修改都會同步顯示。</p>
+                <div class="flex justify-end pt-2">
+                    <button type="button" onclick="closeModal('diagnosticsModal')" class="px-4 py-1.5 bg-slate-800 text-white font-medium rounded-lg">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal: Confirmation Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
@@ -462,7 +504,7 @@
                 </button>
             </div>
             
-            <form id="editWeekForm" onsubmit="saveWeekInfo(event)" class="p-6 space-y-4">
+            <form id="editWeekForm" onsubmit="window.saveWeekInfo(event)" class="p-6 space-y-4">
                 <input type="hidden" id="editWeekTargetId">
 
                 <div class="grid grid-cols-3 gap-2">
@@ -506,7 +548,7 @@
 
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="closeModal('editWeekModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
-                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存修改</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存雲端更新</button>
                 </div>
             </form>
         </div>
@@ -527,7 +569,7 @@
             </div>
             
             <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2 shrink-0">
-                <p class="text-xs text-slate-600">檢視與維護日新國小全學期週次行事曆，可編輯日期或安全刪除。</p>
+                <p class="text-xs text-slate-600">檢視與維護日新國小全學期週次行事曆，雲端同步更新。</p>
                 <button onclick="closeModal('weekListModal'); openModal('addWeekModal');" class="bg-rixinRed-700 hover:bg-rixinRed-800 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 transition">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     新增週次
@@ -568,7 +610,7 @@
                 </button>
             </div>
             
-            <form id="announcementForm" onsubmit="saveAnnouncement(event)" class="p-6 space-y-4">
+            <form id="announcementForm" onsubmit="window.saveAnnouncement(event)" class="p-6 space-y-4">
                 <input type="hidden" id="announcementId">
 
                 <div>
@@ -583,7 +625,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">公告標題 <span class="text-rose-500">*</span></label>
-                    <input type="text" id="announcementTitle" required placeholder="例如：113學年度第一學期特教推委會第二次會議通知" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <input type="text" id="announcementTitle" required placeholder="例如：115學年度第一學期特教推委會第二次會議通知" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
 
                 <div class="grid grid-cols-3 gap-2">
@@ -640,7 +682,7 @@
 
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="closeModal('announcementModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
-                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存公告</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存並同步雲端</button>
                 </div>
             </form>
         </div>
@@ -660,7 +702,7 @@
                 </button>
             </div>
             
-            <form id="proposalForm" onsubmit="saveProposal(event)" class="p-6 space-y-4">
+            <form id="proposalForm" onsubmit="window.saveProposal(event)" class="p-6 space-y-4">
                 <input type="hidden" id="proposalId">
 
                 <div class="grid grid-cols-2 gap-3">
@@ -686,7 +728,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">提案標題 / 案由 <span class="text-rose-500">*</span></label>
-                    <input type="text" id="proposalSubject" required placeholder="例如：日新國小辦理高關懷學生校外生態體驗體驗活動案" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <input type="text" id="proposalSubject" required placeholder="例如：日新國小辦理高關懷學生校外生態體驗活動案" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
 
                 <div>
@@ -719,7 +761,7 @@
 
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeModal('proposalModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
-                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存提案</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">儲存並同步雲端</button>
                 </div>
             </form>
         </div>
@@ -739,11 +781,11 @@
                 </button>
             </div>
             
-            <form id="addWeekForm" onsubmit="saveNewWeek(event)" class="p-6 space-y-4">
+            <form id="addWeekForm" onsubmit="window.saveNewWeek(event)" class="p-6 space-y-4">
                 <div class="grid grid-cols-3 gap-2">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">學年度</label>
-                        <input type="number" id="newYear" required value="113" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <input type="number" id="newYear" required value="115" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">學期</label>
@@ -781,81 +823,59 @@
 
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="closeModal('addWeekModal')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">取消</button>
-                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">新增週次</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-rixinRed-700 hover:bg-rixinRed-800 text-white rounded-lg shadow-sm transition">新增並發布雲端</button>
                 </div>
             </form>
         </div>
     </div>
 
 
-    <!-- Modal: Data Backup & Restoration (JSON) -->
-    <div id="backupModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
-        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
-            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center gap-2">
-                    <i data-lucide="database" class="w-5 h-5 text-cyan-400"></i>
-                    日新國小輔導室 資料備份與復原
-                </h3>
-                <button onclick="closeModal('backupModal')" class="text-slate-400 hover:text-white transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            
-            <div class="p-6 space-y-6">
-                <div>
-                    <h4 class="text-sm font-bold text-slate-800 mb-1">匯出處室資料備份</h4>
-                    <p class="text-xs text-slate-500 mb-3">導出一份 JSON 檔案，保存日新國小輔導室的所有公告、提案與週次設定。</p>
-                    <button onclick="exportJSONData()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition">
-                        <i data-lucide="download" class="w-4 h-4 text-cyan-400"></i>
-                        下載備份 JSON 檔案
-                    </button>
-                </div>
+    <!-- ==================== FIREBASE REALTIME DATABASE ENGINE ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-                <hr class="border-slate-100">
+        // User Specified Firebase Config with Realtime Database URL
+        const firebaseConfig = {
+          apiKey: "AIzaSyCAKemAj10HG7t1R-tZpw_9WN9mmfEhsZw",
+          authDomain: "rixin-guidance.firebaseapp.com",
+          projectId: "rixin-guidance",
+          databaseURL: "https://rixin-guidance-default-rtdb.asia-southeast1.firebasedatabase.app/",
+          storageBucket: "rixin-guidance.firebasestorage.app",
+          messagingSenderId: "658749774345",
+          appId: "1:658749774345:web:4c4d1497578179305b36d8",
+          measurementId: "G-CZ9QPWDS7E"
+        };
 
-                <div>
-                    <h4 class="text-sm font-bold text-slate-800 mb-1">匯入 / 復原備份資料</h4>
-                    <p class="text-xs text-slate-500 mb-3">選擇先前備份的 JSON 檔案載入系統。</p>
-                    <input type="file" id="importFileInput" accept=".json" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
-                    <button onclick="importJSONData()" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition">
-                        <i data-lucide="upload" class="w-4 h-4"></i>
-                        執行匯入覆蓋
-                    </button>
-                </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-                <hr class="border-slate-100">
+        // Global State
+        window.state = {
+            weeks: [],
+            announcements: [],
+            proposals: [],
+            currentWeekId: '',
+            selectedRole: 'all',
+            activeTab: 'announcements',
+            syncError: null
+        };
 
-                <div>
-                    <h4 class="text-sm font-bold text-rose-600 mb-1">重置為日新國小預設範例資料</h4>
-                    <p class="text-xs text-slate-500 mb-2">如需重新載入動態預設的日新國小輔導室範例資料，可點擊重置。</p>
-                    <button onclick="promptResetDemoData()" class="text-xs text-rose-600 border border-rose-200 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition">
-                        重置為預設範例資料
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
-    <script>
-        // Guidance Office 4 Groups Meta Configurations
-        const GROUPS = {
+        // Section Metadata
+        window.GROUPS = {
             director: { id: 'director', name: '輔導主任', color: 'indigo', bgClass: 'bg-indigo-50', borderClass: 'border-indigo-200', textClass: 'text-indigo-800', badgeBg: 'bg-indigo-700' },
             special: { id: 'special', name: '特教組', color: 'purple', bgClass: 'bg-purple-50', borderClass: 'border-purple-200', textClass: 'text-purple-800', badgeBg: 'bg-purple-700' },
             counseling: { id: 'counseling', name: '輔導組', color: 'emerald', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-200', textClass: 'text-emerald-800', badgeBg: 'bg-emerald-700' },
             registration: { id: 'registration', name: '資註組', color: 'cyan', bgClass: 'bg-cyan-50', borderClass: 'border-cyan-200', textClass: 'text-cyan-800', badgeBg: 'bg-cyan-700' }
         };
 
-        // Helper: Format Date object to YYYY-MM-DD
-        function formatDateStr(d) {
+        window.formatDateStr = function(d) {
             const year = d.getFullYear();
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
-        }
+        };
 
-        // Helper: Get Monday and Sunday for a reference date
         function getWeekDateRange(refDate, weekOffset = 0) {
             const d = new Date(refDate);
             const day = d.getDay();
@@ -868,207 +888,628 @@
             sunday.setDate(monday.getDate() + 6);
 
             return {
-                startDate: formatDateStr(monday),
-                endDate: formatDateStr(sunday)
+                startDate: window.formatDateStr(monday),
+                endDate: window.formatDateStr(sunday)
             };
         }
 
-        // Generate Dynamic Default Seed State (Guarantees current calendar week exists)
-        function generateDefaultSeedState() {
-            const today = new Date();
-            const w8Range = getWeekDateRange(today, 0);   // Current week = Week 8
-            const w7Range = getWeekDateRange(today, -1);  // Last week = Week 7
-            const w9Range = getWeekDateRange(today, 1);   // Next week = Week 9
+        // Initialize Firebase Realtime Database Sync
+        function initFirebaseRTDBSync() {
+            let weeksLoaded = false;
 
-            return {
-                currentWeekId: '113-1-8',
-                selectedRole: 'all',
-                activeTab: 'announcements',
-                weeks: [
-                    { id: '113-1-7', year: 113, semester: 1, week: 7, title: '第7週 - 評鑑準備與資料抽查週', startDate: w7Range.startDate, endDate: w7Range.endDate, notes: '備齊校內特教與輔導訪視檢核資料' },
-                    { id: '113-1-8', year: 113, semester: 1, week: 8, title: '第8週 - 特教宣導與性平教育週', startDate: w8Range.startDate, endDate: w8Range.endDate, notes: '召開特推會，發放性平宣導學習單' },
-                    { id: '113-1-9', year: 113, semester: 1, week: 9, title: '第9週 - 輔導紀錄簿與心理測驗初檢週', startDate: w9Range.startDate, endDate: w9Range.endDate, notes: '請導師送交心理測驗結果與紀錄簿' }
-                ],
-                announcements: [
-                    {
-                        id: 'ann-1',
-                        weekId: '113-1-8',
-                        groupId: 'director',
-                        title: '113學年度第一學期 臺北市特教業務評鑑整備提醒',
-                        target: '全校教職員',
-                        priority: '緊急',
-                        status: '進行中',
-                        eventDate: w8Range.startDate,
-                        eventTime: '08:40 - 12:00',
-                        content: '教育局訪視評鑑小組將於本週進行輔導與特教業務實地視導，請特教組、輔導組與各學年代表備妥近三年檢核資料。',
-                        updatedAt: `${w8Range.startDate} 09:00`
-                    },
-                    {
-                        id: 'ann-2',
-                        weekId: '113-1-8',
-                        groupId: 'special',
-                        title: '召開特教推行委員會(特推會)第二次會議',
-                        target: '特教教師',
-                        priority: '重要',
-                        status: '進行中',
-                        eventDate: w8Range.startDate,
-                        eventTime: '12:30 - 13:30',
-                        content: '請特推會委員及各年級導師代表準時至校史室參會，審議下學期特教助理員申請與IEP追蹤計畫。',
-                        updatedAt: `${w8Range.startDate} 10:15`
-                    },
-                    {
-                        id: 'ann-3',
-                        weekId: '113-1-8',
-                        groupId: 'counseling',
-                        title: '辦理全校「性別平等教育主題宣導」有獎徵答',
-                        target: '全校學生',
-                        priority: '普通',
-                        status: '進行中',
-                        eventDate: w8Range.endDate,
-                        eventTime: '晨會時間',
-                        content: '請各班導師協助發放學習單，填妥後投入輔導室投獎箱，將於下週一公開抽獎。',
-                        updatedAt: `${w8Range.startDate} 11:30`
-                    },
-                    {
-                        id: 'ann-4',
-                        weekId: '113-1-8',
-                        groupId: 'registration',
-                        title: '四、六年級學生心理測驗登錄與紙本輔導紀錄簿送核',
-                        target: '各班導師',
-                        priority: '重要',
-                        status: '進行中',
-                        eventDate: w8Range.endDate,
-                        eventTime: '16:00 前',
-                        content: '請導師登入校務行政系統確認測驗結果，並於本週五前將紙本輔導紀錄簿送至資註組完成初檢與核章。',
-                        updatedAt: `${w8Range.startDate} 14:00`
-                    }
-                ],
-                proposals: [
-                    {
-                        id: 'prop-1',
-                        weekId: '113-1-8',
-                        groupId: 'special',
-                        subject: '擬辦理「日新國小 113學年度身心障礙學生個別化教育計畫 (IEP) 檢討會」案',
-                        description: '為檢視學習輔導成效，規劃於第 12 週邀集外聘專家、特教團隊與學生家長召開檢討會。',
-                        proposedAction: '奉核後由特教組發函通知專家團隊與家長，並簽請發給專家出席費與公假排代。',
-                        priority: '重要',
-                        status: '報局核備中',
-                        resolution: '原則通過，請注意時間避開期末定期考查，並報請教育局核備。',
-                        updatedAt: `${w8Range.startDate} 15:00`
-                    },
-                    {
-                        id: 'prop-2',
-                        weekId: '113-1-8',
-                        groupId: 'counseling',
-                        subject: '申請辦理「日新國小高關懷學生校外生態體驗輔導活動」實施計畫',
-                        description: '針對校內需正向行為支持之高關懷學生，安排一日農場生態體驗活動，建立同儕輔導支持網絡。',
-                        proposedAction: '擬向教育局申請專案補助新臺幣 28,000 元，並簽請派隨隊教師公假排代。',
-                        priority: '普通',
-                        status: '執行中',
-                        resolution: '照案通過，請輔導組確實宣導並完成家長同意書徵求。',
-                        updatedAt: `${w8Range.startDate} 16:20`
-                    },
-                    {
-                        id: 'prop-3',
-                        weekId: '113-1-8',
-                        groupId: 'registration',
-                        subject: '建請採購續約輔導室心理測驗線上授權與資安備份升級案',
-                        description: '輔導室測驗系統現有授權即將到期，且學生個資防護設備需增購外接備份硬體。',
-                        proposedAction: '擬採購一年期系統授權與資安硬體，經費由輔導室相關業務費項下支應。',
-                        priority: '普通',
-                        status: '主管會議討論中',
-                        resolution: '請資註組補充兩家以上廠商報價單後再行簽核。',
-                        updatedAt: `${w8Range.startDate} 17:00`
-                    }
-                ]
-            };
-        }
+            // 1. Listen to Weeks
+            onValue(ref(db, 'weeks'), (snapshot) => {
+                window.state.syncError = null;
+                updateSyncStatus('connected', '🟢 雲端連線中（多人即時協作）');
 
-        let appData = loadStorageData();
-
-        // Load data from LocalStorage (NEVER overwrite if user data exists)
-        function loadStorageData() {
-            try {
-                const stored = localStorage.getItem('rixin_guidance_app_data');
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    if (parsed && Array.isArray(parsed.weeks) && parsed.weeks.length > 0) {
-                        return parsed;
-                    }
+                const val = snapshot.val();
+                let list = [];
+                if (val) {
+                    list = Object.values(val);
                 }
-            } catch (e) {
-                console.error("LocalStorage load error", e);
-            }
-            return generateDefaultSeedState();
+
+                list.sort((a,b) => (a.year*1000 + a.semester*100 + a.week) - (b.year*1000 + b.semester*100 + b.week));
+                window.state.weeks = list;
+
+                if (!weeksLoaded && list.length === 0) {
+                    weeksLoaded = true;
+                    seedDefaultRTDBData();
+                } else {
+                    weeksLoaded = true;
+                    autoSelectCurrentWeek();
+                    renderHeaderWeeks();
+                    updateCurrentWeekDisplay();
+                    renderActiveTabContent();
+                }
+            }, (error) => {
+                console.error("RTDB Weeks Listener Error:", error);
+                window.state.syncError = error.message;
+                updateSyncStatus('error', '⚠️ 離線暫存模式 (雲端未連線)');
+                loadLocalStorageFallback();
+            });
+
+            // 2. Listen to Announcements
+            onValue(ref(db, 'announcements'), (snapshot) => {
+                const val = snapshot.val();
+                let list = [];
+                if (val) {
+                    list = Object.values(val);
+                }
+                window.state.announcements = list;
+                renderActiveTabContent();
+            }, (error) => {
+                console.error("RTDB Announcements Error:", error);
+            });
+
+            // 3. Listen to Proposals
+            onValue(ref(db, 'proposals'), (snapshot) => {
+                const val = snapshot.val();
+                let list = [];
+                if (val) {
+                    list = Object.values(val);
+                }
+                window.state.proposals = list;
+                renderActiveTabContent();
+            }, (error) => {
+                console.error("RTDB Proposals Error:", error);
+            });
         }
 
-        // Save data to LocalStorage
-        function saveStorageData() {
+        function updateSyncStatus(status, text) {
+            const badge = document.getElementById('syncStatusBadge');
+            const textEl = document.getElementById('syncStatusText');
+            if (badge && textEl) {
+                textEl.textContent = text;
+                if (status === 'connected') {
+                    badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800 transition hover:opacity-90";
+                } else {
+                    badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-950 text-rose-400 border border-rose-800 transition hover:opacity-90";
+                }
+            }
+
+            const diagBox = document.getElementById('diagStatusBox');
+            if (diagBox) {
+                if (status === 'connected') {
+                    diagBox.className = "p-3 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800 font-semibold";
+                    diagBox.innerHTML = "✅ 雲端即時資料庫 (Realtime Database) 已成功連線！全處室同仁可即時共同編輯。";
+                } else {
+                    diagBox.className = "p-3 rounded-lg border bg-rose-50 border-rose-200 text-rose-800 font-semibold";
+                    diagBox.innerHTML = `❌ 雲端連線未開通：${escapeHtml(window.state.syncError || '網路存取受限')}<br><span class="text-xs font-normal text-rose-700">請確認 Firebase 控制台 Rules 頁籤中已設定 ".read": true, ".write": true</span>`;
+                }
+            }
+        }
+
+        function loadLocalStorageFallback() {
+            const localData = localStorage.getItem('rixin_guidance_backup_v1');
+            if (localData) {
+                try {
+                    const parsed = JSON.parse(localData);
+                    window.state.weeks = parsed.weeks || [];
+                    window.state.announcements = parsed.announcements || [];
+                    window.state.proposals = parsed.proposals || [];
+                } catch(e){}
+            }
+            autoSelectCurrentWeek();
+            renderHeaderWeeks();
+            updateCurrentWeekDisplay();
+            renderActiveTabContent();
+        }
+
+        function saveToLocalFallback() {
+            localStorage.setItem('rixin_guidance_backup_v1', JSON.stringify({
+                weeks: window.state.weeks,
+                announcements: window.state.announcements,
+                proposals: window.state.proposals
+            }));
+        }
+
+        // Seed Initial 115-1 Data to Realtime Database
+        async function seedDefaultRTDBData() {
+            const today = new Date();
+            const w8Range = getWeekDateRange(today, 0);   // Week 8 (Current)
+            const w7Range = getWeekDateRange(today, -1);  // Week 7
+            const w9Range = getWeekDateRange(today, 1);   // Week 9
+
+            const seedWeeks = {
+                '115-1-7': { id: '115-1-7', year: 115, semester: 1, week: 7, title: '第7週 - 評鑑準備與資料抽查週', startDate: w7Range.startDate, endDate: w7Range.endDate, notes: '備齊校內特教與輔導訪視檢核資料' },
+                '115-1-8': { id: '115-1-8', year: 115, semester: 1, week: 8, title: '第8週 - 特教宣導與性平教育週', startDate: w8Range.startDate, endDate: w8Range.endDate, notes: '召開特推會，發放性平宣導學習單' },
+                '115-1-9': { id: '115-1-9', year: 115, semester: 1, week: 9, title: '第9週 - 輔導紀錄簿與心理測驗初檢週', startDate: w9Range.startDate, endDate: w9Range.endDate, notes: '請導師送交心理測驗結果與紀錄簿' }
+            };
+
+            const seedAnnouncements = {
+                'ann-1': {
+                    id: 'ann-1',
+                    weekId: '115-1-8',
+                    groupId: 'director',
+                    title: '115學年度第一學期 臺北市特教業務評鑑整備提醒',
+                    target: '全校教職員',
+                    priority: '緊急',
+                    status: '進行中',
+                    eventDate: w8Range.startDate,
+                    eventTime: '08:40 - 12:00',
+                    content: '教育局訪視評鑑小組將於本週進行輔導與特教業務實地視導，請特教組、輔導組與各學年代表備妥近三年檢核資料。',
+                    updatedAt: `${w8Range.startDate} 09:00`
+                },
+                'ann-2': {
+                    id: 'ann-2',
+                    weekId: '115-1-8',
+                    groupId: 'special',
+                    title: '召開特教推行委員會(特推會)第二次會議',
+                    target: '特教教師',
+                    priority: '重要',
+                    status: '進行中',
+                    eventDate: w8Range.startDate,
+                    eventTime: '12:30 - 13:30',
+                    content: '請特推會委員及各年級導師代表準時至校史室參會，審議下學期特教助理員申請與 IEP 追蹤計畫。',
+                    updatedAt: `${w8Range.startDate} 10:15`
+                },
+                'ann-3': {
+                    id: 'ann-3',
+                    weekId: '115-1-8',
+                    groupId: 'counseling',
+                    title: '辦理全校「性別平等教育主題宣導」有獎徵答',
+                    target: '全校學生',
+                    priority: '普通',
+                    status: '進行中',
+                    eventDate: w8Range.endDate,
+                    eventTime: '晨會時間',
+                    content: '請各班導師協助發放學習單，填妥後投入輔導室投獎箱，將於下週一公開抽獎。',
+                    updatedAt: `${w8Range.startDate} 11:30`
+                },
+                'ann-4': {
+                    id: 'ann-4',
+                    weekId: '115-1-8',
+                    groupId: 'registration',
+                    title: '四、六年級學生心理測驗登錄與紙本輔導紀錄簿送核',
+                    target: '各班導師',
+                    priority: '重要',
+                    status: '進行中',
+                    eventDate: w8Range.endDate,
+                    eventTime: '16:00 前',
+                    content: '請導師登入校務行政系統確認測驗結果，並於本週五前將紙本輔導紀錄簿送至資註組完成初檢與核章。',
+                    updatedAt: `${w8Range.startDate} 14:00`
+                }
+            };
+
+            const seedProposals = {
+                'prop-1': {
+                    id: 'prop-1',
+                    weekId: '115-1-8',
+                    groupId: 'special',
+                    subject: '擬辦理「日新國小 115學年度身心障礙學生個別化教育計畫 (IEP) 檢討會」案',
+                    description: '為檢視學習輔導成效，規劃於第 12 週邀集外聘專家、特教團隊與學生家長召開檢討會。',
+                    proposedAction: '奉核後由特教組發函通知專家團隊與家長，並簽請發給專家出席費與公假排代。',
+                    priority: '重要',
+                    status: '報局核備中',
+                    resolution: '原則通過，請注意時間避開期末定期考查，並報請教育局核備。',
+                    updatedAt: `${w8Range.startDate} 15:00`
+                },
+                'prop-2': {
+                    id: 'prop-2',
+                    weekId: '115-1-8',
+                    groupId: 'counseling',
+                    subject: '申請辦理「日新國小高關懷學生校外生態體驗輔導活動」實施計畫',
+                    description: '針對校內需正向行為支持之高關懷學生，安排一日農場生態體驗活動，建立同儕輔導支持網絡。',
+                    proposedAction: '擬向教育局申請專案補助新臺幣 28,000 元，並簽請派隨隊教師公假排代。',
+                    priority: '普通',
+                    status: '執行中',
+                    resolution: '照案通過，請輔導組確實宣導並完成家長同意書徵求。',
+                    updatedAt: `${w8Range.startDate} 16:20`
+                }
+            };
+
             try {
-                localStorage.setItem('rixin_guidance_app_data', JSON.stringify(appData));
+                await set(ref(db, 'weeks'), seedWeeks);
+                await set(ref(db, 'announcements'), seedAnnouncements);
+                await set(ref(db, 'proposals'), seedProposals);
+                showToast("已成功載入日新國小 115 學年度雲端資料！", "success");
             } catch (e) {
-                console.error("LocalStorage save error", e);
-                showToast("儲存失敗", "error");
+                console.error("RTDB Seed Error:", e);
             }
         }
 
-        // Find Week ID corresponding to Today's date
         function findCalendarWeekByToday() {
-            const todayStr = formatDateStr(new Date());
-            const matchedWeek = appData.weeks.find(w => todayStr >= w.startDate && todayStr <= w.endDate);
-            return matchedWeek ? matchedWeek.id : null;
+            const todayStr = window.formatDateStr(new Date());
+            const matched = window.state.weeks.find(w => todayStr >= w.startDate && todayStr <= w.endDate);
+            return matched ? matched.id : null;
         }
 
-        // Jump to Real Current Week Automatically
-        function goToCurrentCalendarWeek(showNotification = false) {
+        function autoSelectCurrentWeek() {
             const todayWeekId = findCalendarWeekByToday();
             if (todayWeekId) {
-                appData.currentWeekId = todayWeekId;
-                saveStorageData();
+                window.state.currentWeekId = todayWeekId;
+            } else if (!window.state.currentWeekId || !window.state.weeks.some(w => w.id === window.state.currentWeekId)) {
+                if (window.state.weeks.length > 0) window.state.currentWeekId = window.state.weeks[0].id;
+            }
+        }
+
+        // Global Operations
+        window.goToCurrentCalendarWeek = function(showNotice = false) {
+            const todayWeekId = findCalendarWeekByToday();
+            if (todayWeekId) {
+                window.state.currentWeekId = todayWeekId;
                 renderHeaderWeeks();
                 updateCurrentWeekDisplay();
                 renderActiveTabContent();
-                if (showNotification) showToast("已切換至今日所屬之「本週」！", "success");
+                if (showNotice) showToast("已自動切換至今日所屬之「本週」！", "success");
             } else {
-                if (showNotification) {
-                    showToast(`今天（${formatDateStr(new Date())}）未在現有週次範圍內，您可以點擊「新增週次」建立新行事曆。`, "info");
+                if (showNotice) showToast(`今日（${window.formatDateStr(new Date())}）未在現有週次範圍內。`, "info");
+            }
+        };
+
+        window.handleWeekSelect = function(weekId) {
+            if (!weekId) return;
+            window.state.currentWeekId = weekId;
+            updateCurrentWeekDisplay();
+            renderActiveTabContent();
+        };
+
+        window.changeWeek = function(delta) {
+            const idx = window.state.weeks.findIndex(w => w.id === window.state.currentWeekId);
+            if (idx !== -1) {
+                const newIdx = idx + delta;
+                if (newIdx >= 0 && newIdx < window.state.weeks.length) {
+                    window.state.currentWeekId = window.state.weeks[newIdx].id;
+                    document.getElementById('weekSelect').value = window.state.currentWeekId;
+                    updateCurrentWeekDisplay();
+                    renderActiveTabContent();
+                } else {
+                    showToast("已至最前/最後週次！", "info");
                 }
             }
-        }
+        };
 
-        // Initialize Application
-        function initApp() {
-            // Auto-detect Today's week on startup
-            const todayWeekId = findCalendarWeekByToday();
-            if (todayWeekId) {
-                appData.currentWeekId = todayWeekId;
-            } else if (!appData.currentWeekId || !appData.weeks.some(w => w.id === appData.currentWeekId)) {
-                if (appData.weeks.length > 0) appData.currentWeekId = appData.weeks[0].id;
+        window.setRole = function(role) {
+            window.state.selectedRole = role;
+            renderRoleButtons();
+            renderActiveTabContent();
+        };
+
+        window.switchTab = function(tabId) {
+            window.state.activeTab = tabId;
+
+            ['announcements', 'proposals', 'report'].forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                const content = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    btn.className = "tab-btn pb-3 px-1 text-sm font-bold border-b-2 border-rixinRed-700 text-rixinRed-700 transition flex items-center gap-2";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "tab-btn pb-3 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition flex items-center gap-2";
+                    content.classList.add('hidden');
+                }
+            });
+
+            renderActiveTabContent();
+        };
+
+        // RTDB Sync: Announcements
+        window.saveAnnouncement = async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('announcementId').value;
+            const groupId = document.getElementById('announcementGroup').value;
+            const title = document.getElementById('announcementTitle').value.trim();
+            const target = document.getElementById('announcementTarget').value;
+            const priority = document.getElementById('announcementPriority').value;
+            const status = document.getElementById('announcementStatus').value;
+            const eventDate = document.getElementById('announcementEventDate').value;
+            const eventTime = document.getElementById('announcementEventTime').value.trim();
+            const content = document.getElementById('announcementContent').value.trim();
+
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            const targetId = id || ('ann-' + Date.now());
+            const data = {
+                id: targetId,
+                weekId: window.state.currentWeekId,
+                groupId,
+                title,
+                target,
+                priority,
+                status,
+                eventDate,
+                eventTime,
+                content,
+                updatedAt: timeStr
+            };
+
+            try {
+                await set(ref(db, 'announcements/' + targetId), data);
+                closeModal('announcementModal');
+                showToast("公告事項已成功發布並同步至雲端！", "success");
+            } catch (err) {
+                console.error(err);
+                saveToLocalFallback();
+                closeModal('announcementModal');
+                showToast("雲端同步受阻，已先進行單機暫存", "info");
+            }
+        };
+
+        window.promptDeleteAnnouncement = function(id) {
+            const item = window.state.announcements.find(a => a.id === id);
+            if (!item) return;
+
+            showConfirmModal({
+                title: '刪除公告確認',
+                message: `確定要從雲端刪除「${escapeHtml(item.title)}」嗎？`,
+                okText: '確認刪除',
+                onConfirm: async () => {
+                    try {
+                        await remove(ref(db, 'announcements/' + id));
+                        showToast("已從雲端刪除該公告", "success");
+                    } catch (e) {
+                        saveToLocalFallback();
+                        showToast("已從本地移除", "info");
+                    }
+                }
+            });
+        };
+
+        // RTDB Sync: Proposals
+        window.saveProposal = async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('proposalId').value;
+            const groupId = document.getElementById('proposalGroup').value;
+            const subject = document.getElementById('proposalSubject').value.trim();
+            const description = document.getElementById('proposalDescription').value.trim();
+            const proposedAction = document.getElementById('proposalAction').value.trim();
+            const priority = document.getElementById('proposalPriority').value;
+            const status = document.getElementById('proposalStatus').value;
+            const resolution = document.getElementById('proposalResolution').value.trim();
+
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            const targetId = id || ('prop-' + Date.now());
+            const data = {
+                id: targetId,
+                weekId: window.state.currentWeekId,
+                groupId,
+                subject,
+                description,
+                proposedAction,
+                priority,
+                status,
+                resolution,
+                updatedAt: timeStr
+            };
+
+            try {
+                await set(ref(db, 'proposals/' + targetId), data);
+                closeModal('proposalModal');
+                showToast("主管會議提案與決議已即時同步！", "success");
+            } catch (err) {
+                console.error(err);
+                saveToLocalFallback();
+                closeModal('proposalModal');
+                showToast("已先儲存於本地", "info");
+            }
+        };
+
+        window.promptDeleteProposal = function(id) {
+            const item = window.state.proposals.find(p => p.id === id);
+            if (!item) return;
+
+            showConfirmModal({
+                title: '刪除提案確認',
+                message: `確定要刪除主管會議提案「${escapeHtml(item.subject)}」嗎？`,
+                okText: '刪除提案',
+                onConfirm: async () => {
+                    try {
+                        await remove(ref(db, 'proposals/' + id));
+                        showToast("提案已從雲端刪除", "success");
+                    } catch (e) {
+                        saveToLocalFallback();
+                        showToast("已從本地刪除", "info");
+                    }
+                }
+            });
+        };
+
+        // RTDB Sync: Weeks
+        window.saveWeekInfo = async function(e) {
+            e.preventDefault();
+            const targetId = document.getElementById('editWeekTargetId').value;
+            const year = parseInt(document.getElementById('editWeekYear').value);
+            const semester = parseInt(document.getElementById('editWeekSemester').value);
+            const weekNum = parseInt(document.getElementById('editWeekNum').value);
+            const title = document.getElementById('editWeekTitle').value.trim();
+            const startDate = document.getElementById('editWeekStartDate').value;
+            const endDate = document.getElementById('editWeekEndDate').value;
+            const notes = document.getElementById('editWeekNotes').value.trim();
+
+            const newId = `${year}-${semester}-${weekNum}`;
+
+            const data = {
+                id: newId,
+                year,
+                semester,
+                week: weekNum,
+                title: title || `第${weekNum}週`,
+                startDate,
+                endDate,
+                notes
+            };
+
+            try {
+                if (newId !== targetId) {
+                    await set(ref(db, 'weeks/' + newId), data);
+                    await remove(ref(db, 'weeks/' + targetId));
+                    window.state.currentWeekId = newId;
+                } else {
+                    await set(ref(db, 'weeks/' + targetId), data);
+                }
+
+                closeModal('editWeekModal');
+                showToast("當週行事曆資訊已成功同步！", "success");
+            } catch (err) {
+                console.error(err);
+                saveToLocalFallback();
+                closeModal('editWeekModal');
+                showToast("已先更新本地行事曆", "info");
+            }
+        };
+
+        window.saveNewWeek = async function(e) {
+            e.preventDefault();
+            const year = parseInt(document.getElementById('newYear').value);
+            const semester = parseInt(document.getElementById('newSemester').value);
+            const week = parseInt(document.getElementById('newWeekNum').value);
+            const customTitle = document.getElementById('newWeekTitle').value.trim();
+            const startDate = document.getElementById('newStartDate').value;
+            const endDate = document.getElementById('newEndDate').value;
+            const notes = document.getElementById('newWeekNotes').value.trim();
+
+            const weekId = `${year}-${semester}-${week}`;
+            if (window.state.weeks.some(w => w.id === weekId)) {
+                showToast("該週次編號已存在！", "error");
+                return;
             }
 
-            renderHeaderWeeks();
-            updateCurrentWeekDisplay();
-            renderRoleButtons();
-            switchTab(appData.activeTab || 'announcements', false);
-            lucide.createIcons();
-        }
+            const data = {
+                id: weekId,
+                year,
+                semester,
+                week,
+                title: customTitle || `第${week}週`,
+                startDate,
+                endDate,
+                notes
+            };
 
-        // Render Weeks in Header Dropdown
+            try {
+                await set(ref(db, 'weeks/' + weekId), data);
+                window.state.currentWeekId = weekId;
+                closeModal('addWeekModal');
+                showToast(`已成功建立並切換至「${data.title}」！`, "success");
+            } catch (err) {
+                saveToLocalFallback();
+                closeModal('addWeekModal');
+                showToast("已先新增於本地", "info");
+            }
+        };
+
+        window.promptDeleteWeek = function(weekId) {
+            const week = window.state.weeks.find(w => w.id === weekId);
+            if (!week) return;
+
+            const annCount = window.state.announcements.filter(a => a.weekId === weekId).length;
+            const propCount = window.state.proposals.filter(p => p.weekId === weekId).length;
+            const weekLabel = week.title || `${week.year}學年度第${week.semester}學期 第${week.week}週`;
+
+            let detailHtml = `
+                <div class="font-bold text-slate-700">準備刪除：${escapeHtml(weekLabel)} (${week.startDate} ~ ${week.endDate})</div>
+                <div class="text-rose-600 font-semibold mt-1">⚠️ 關聯資料：該週次包含</div>
+                <ul class="list-disc list-inside text-slate-600 mt-0.5">
+                    <li>${annCount} 筆公告事項</li>
+                    <li>${propCount} 筆主管會議提案</li>
+                </ul>
+            `;
+
+            showConfirmModal({
+                title: '刪除當週行事曆確認',
+                message: `確定要從雲端刪除日新國小「${escapeHtml(weekLabel)}」的行事曆嗎？`,
+                detailsHtml: detailHtml,
+                okText: '確認刪除週次',
+                onConfirm: async () => {
+                    try {
+                        await remove(ref(db, 'weeks/' + weekId));
+
+                        const toDeleteAnns = window.state.announcements.filter(a => a.weekId === weekId);
+                        for (let a of toDeleteAnns) await remove(ref(db, 'announcements/' + a.id));
+
+                        const toDeleteProps = window.state.proposals.filter(p => p.weekId === weekId);
+                        for (let p of toDeleteProps) await remove(ref(db, 'proposals/' + p.id));
+
+                        showToast("已從雲端刪除該週次及其附屬資料", "success");
+                    } catch (err) {
+                        saveToLocalFallback();
+                        showToast("已從本地移除", "info");
+                    }
+                }
+            });
+        };
+
+        // Export/Import JSON Backup
+        window.exportJsonBackup = function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                weeks: window.state.weeks,
+                announcements: window.state.announcements,
+                proposals: window.state.proposals,
+                exportedAt: new Date().toISOString()
+            }, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `日新國小輔導室事項備份_${window.formatDateStr(new Date())}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+            showToast("已成功匯出 JSON 備份檔案！", "success");
+        };
+
+        window.triggerJsonImport = function() {
+            document.getElementById('jsonFileInput').click();
+        };
+
+        window.handleJsonFileImport = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.weeks && importedData.announcements && importedData.proposals) {
+                        const weeksObj = {};
+                        importedData.weeks.forEach(w => weeksObj[w.id] = w);
+                        
+                        const annObj = {};
+                        importedData.announcements.forEach(a => annObj[a.id] = a);
+
+                        const propObj = {};
+                        importedData.proposals.forEach(p => propObj[p.id] = p);
+
+                        await set(ref(db, 'weeks'), weeksObj);
+                        await set(ref(db, 'announcements'), annObj);
+                        await set(ref(db, 'proposals'), propObj);
+
+                        showToast("JSON 備份檔案已成功導入 Realtime Database！", "success");
+                    } else {
+                        showToast("格式不符合輔導室備份檔標準", "error");
+                    }
+                } catch (err) {
+                    showToast("讀取 JSON 檔案失敗", "error");
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        window.openDiagnosticsModal = function() {
+            openModal('diagnosticsModal');
+        };
+
+        // Run Connection
+        initFirebaseRTDBSync();
+    </script>
+
+    <!-- UI Dynamic Rendering Script -->
+    <script>
         function renderHeaderWeeks() {
             const select = document.getElementById('weekSelect');
             select.innerHTML = '';
             
-            if (appData.weeks.length === 0) {
+            if (!state.weeks || state.weeks.length === 0) {
                 const opt = document.createElement('option');
                 opt.value = '';
-                opt.textContent = '無可用週次';
+                opt.textContent = '載入中...';
                 select.appendChild(opt);
                 return;
             }
 
-            const todayStr = formatDateStr(new Date());
+            const todayStr = window.formatDateStr(new Date());
 
-            appData.weeks.forEach(w => {
+            state.weeks.forEach(w => {
                 const opt = document.createElement('option');
                 opt.value = w.id;
                 
@@ -1077,20 +1518,19 @@
                 const label = w.title ? `${w.title}${tag}` : `${w.year}學年 第${w.semester}學期 第${w.week}週${tag}`;
                 
                 opt.textContent = label;
-                if (w.id === appData.currentWeekId) opt.selected = true;
+                if (w.id === state.currentWeekId) opt.selected = true;
                 select.appendChild(opt);
             });
         }
 
-        // Update Week Info Display
         function updateCurrentWeekDisplay() {
-            const currentWeek = appData.weeks.find(w => w.id === appData.currentWeekId) || appData.weeks[0];
+            const currentWeek = state.weeks.find(w => w.id === state.currentWeekId) || state.weeks[0];
             if (currentWeek) {
                 const tagText = currentWeek.title ? currentWeek.title : `${currentWeek.year}學年度 第${currentWeek.semester}學期 第${currentWeek.week}週`;
                 document.getElementById('currentWeekTag').textContent = tagText;
                 document.getElementById('currentDateRange').textContent = `${currentWeek.startDate} ~ ${currentWeek.endDate}`;
 
-                const todayStr = formatDateStr(new Date());
+                const todayStr = window.formatDateStr(new Date());
                 const isToday = (todayStr >= currentWeek.startDate && todayStr <= currentWeek.endDate);
                 const isTodayBadge = document.getElementById('isTodayWeekBadge');
 
@@ -1120,40 +1560,13 @@
             }
         }
 
-        // Handle Change Week Dropdown
-        function handleWeekSelect(weekId) {
-            if (!weekId) return;
-            appData.currentWeekId = weekId;
-            saveStorageData();
-            updateCurrentWeekDisplay();
-            renderActiveTabContent();
-        }
-
-        // Change Week Prev/Next
-        function changeWeek(delta) {
-            const idx = appData.weeks.findIndex(w => w.id === appData.currentWeekId);
-            if (idx !== -1) {
-                const newIdx = idx + delta;
-                if (newIdx >= 0 && newIdx < appData.weeks.length) {
-                    appData.currentWeekId = appData.weeks[newIdx].id;
-                    document.getElementById('weekSelect').value = appData.currentWeekId;
-                    saveStorageData();
-                    updateCurrentWeekDisplay();
-                    renderActiveTabContent();
-                } else {
-                    showToast("無更多週次，可點擊「新增週次」按鈕建立！", "info");
-                }
-            }
-        }
-
-        // Render Role Switcher Buttons
         function renderRoleButtons() {
             const roles = ['all', 'director', 'special', 'counseling', 'registration'];
             roles.forEach(role => {
                 const btn = document.getElementById(`roleBtn-${role}`);
                 if (!btn) return;
 
-                if (appData.selectedRole === role) {
+                if (state.selectedRole === role) {
                     btn.className = "role-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap bg-slate-900 text-white shadow-sm border-slate-900";
                 } else {
                     btn.className = "role-btn px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition whitespace-nowrap bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200";
@@ -1161,48 +1574,22 @@
             });
         }
 
-        // Set Role Filter
-        function setRole(role) {
-            appData.selectedRole = role;
-            saveStorageData();
-            renderRoleButtons();
-            renderActiveTabContent();
-        }
-
-        // Switch Tab
-        function switchTab(tabId, save = true) {
-            appData.activeTab = tabId;
-            if (save) saveStorageData();
-
-            ['announcements', 'proposals', 'report'].forEach(t => {
-                const btn = document.getElementById(`tabBtn-${t}`);
-                const content = document.getElementById(`tab-${t}`);
-                if (t === tabId) {
-                    btn.className = "tab-btn pb-3 px-1 text-sm font-bold border-b-2 border-rixinRed-700 text-rixinRed-700 transition flex items-center gap-2";
-                    content.classList.remove('hidden');
-                } else {
-                    btn.className = "tab-btn pb-3 px-1 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition flex items-center gap-2";
-                    content.classList.add('hidden');
-                }
-            });
-
-            renderActiveTabContent();
-        }
-
-        // Render Active Tab Content
         function renderActiveTabContent() {
+            renderHeaderWeeks();
+            updateCurrentWeekDisplay();
+            renderRoleButtons();
             updateBadges();
-            if (appData.activeTab === 'announcements') {
+
+            if (state.activeTab === 'announcements') {
                 renderAnnouncements();
-            } else if (appData.activeTab === 'proposals') {
+            } else if (state.activeTab === 'proposals') {
                 renderProposals();
-            } else if (appData.activeTab === 'report') {
+            } else if (state.activeTab === 'report') {
                 renderReport();
             }
             lucide.createIcons();
         }
 
-        // Update Badges Count
         function updateBadges() {
             const announcements = getFilteredAnnouncements();
             const proposals = getFilteredProposals();
@@ -1210,11 +1597,10 @@
             document.getElementById('proposalBadge').textContent = proposals.length;
         }
 
-        // Filter Announcements
         function getFilteredAnnouncements() {
-            return appData.announcements.filter(a => {
-                if (a.weekId !== appData.currentWeekId) return false;
-                if (appData.selectedRole !== 'all' && a.groupId !== appData.selectedRole) return false;
+            return state.announcements.filter(a => {
+                if (a.weekId !== state.currentWeekId) return false;
+                if (state.selectedRole !== 'all' && a.groupId !== state.selectedRole) return false;
                 
                 const q = (document.getElementById('announcementSearch')?.value || '').toLowerCase();
                 if (q && !a.title.toLowerCase().includes(q) && !a.content.toLowerCase().includes(q)) return false;
@@ -1232,11 +1618,10 @@
             });
         }
 
-        // Filter Proposals
         function getFilteredProposals() {
-            return appData.proposals.filter(p => {
-                if (p.weekId !== appData.currentWeekId) return false;
-                if (appData.selectedRole !== 'all' && p.groupId !== appData.selectedRole) return false;
+            return state.proposals.filter(p => {
+                if (p.weekId !== state.currentWeekId) return false;
+                if (state.selectedRole !== 'all' && p.groupId !== state.selectedRole) return false;
 
                 const q = (document.getElementById('proposalSearch')?.value || '').toLowerCase();
                 if (q && !p.subject.toLowerCase().includes(q) && !p.description.toLowerCase().includes(q) && !p.proposedAction.toLowerCase().includes(q)) return false;
@@ -1248,199 +1633,15 @@
             });
         }
 
-        // ==================== EDIT & DELETE WEEK ====================
-        function openEditWeekModal(weekId) {
-            const week = appData.weeks.find(w => w.id === weekId);
-            if (!week) return;
-
-            document.getElementById('editWeekTargetId').value = week.id;
-            document.getElementById('editWeekYear').value = week.year;
-            document.getElementById('editWeekSemester').value = week.semester;
-            document.getElementById('editWeekNum').value = week.week;
-            document.getElementById('editWeekTitle').value = week.title || '';
-            document.getElementById('editWeekStartDate').value = week.startDate;
-            document.getElementById('editWeekEndDate').value = week.endDate;
-            document.getElementById('editWeekNotes').value = week.notes || '';
-
-            openModal('editWeekModal');
-        }
-
-        function saveWeekInfo(e) {
-            e.preventDefault();
-            const targetId = document.getElementById('editWeekTargetId').value;
-            const week = appData.weeks.find(w => w.id === targetId);
-            if (!week) return;
-
-            const year = parseInt(document.getElementById('editWeekYear').value);
-            const semester = parseInt(document.getElementById('editWeekSemester').value);
-            const weekNum = parseInt(document.getElementById('editWeekNum').value);
-            const title = document.getElementById('editWeekTitle').value.trim();
-            const startDate = document.getElementById('editWeekStartDate').value;
-            const endDate = document.getElementById('editWeekEndDate').value;
-            const notes = document.getElementById('editWeekNotes').value.trim();
-
-            const newId = `${year}-${semester}-${weekNum}`;
-
-            if (newId !== targetId && appData.weeks.some(w => w.id === newId)) {
-                showToast("該週次編號已存在，請確認學年度與週次！", "error");
-                return;
-            }
-
-            week.year = year;
-            week.semester = semester;
-            week.week = weekNum;
-            week.title = title || `第${weekNum}週`;
-            week.startDate = startDate;
-            week.endDate = endDate;
-            week.notes = notes;
-
-            if (newId !== targetId) {
-                week.id = newId;
-                appData.announcements.forEach(a => { if (a.weekId === targetId) a.weekId = newId; });
-                appData.proposals.forEach(p => { if (p.weekId === targetId) p.weekId = newId; });
-                if (appData.currentWeekId === targetId) {
-                    appData.currentWeekId = newId;
-                }
-            }
-
-            appData.weeks.sort((a,b) => (a.year*1000 + a.semester*100 + a.week) - (b.year*1000 + b.semester*100 + b.week));
-
-            saveStorageData();
-            closeModal('editWeekModal');
-            renderHeaderWeeks();
-            updateCurrentWeekDisplay();
-            renderActiveTabContent();
-            if (!document.getElementById('weekListModal').classList.contains('hidden')) {
-                renderWeekTable();
-            }
-            showToast("當週行事曆資訊已成功更新！");
-        }
-
-        function promptDeleteWeek(weekId) {
-            const week = appData.weeks.find(w => w.id === weekId);
-            if (!week) return;
-
-            const annCount = appData.announcements.filter(a => a.weekId === weekId).length;
-            const propCount = appData.proposals.filter(p => p.weekId === weekId).length;
-            const weekLabel = week.title || `${week.year}學年度第${week.semester}學期 第${week.week}週`;
-
-            let detailHtml = `
-                <div class="font-bold text-slate-700">準備刪除：${escapeHtml(weekLabel)} (${week.startDate} ~ ${week.endDate})</div>
-                <div class="text-rose-600 font-semibold mt-1">⚠️ 關聯資料：該週次包含</div>
-                <ul class="list-disc list-inside text-slate-600 mt-0.5">
-                    <li>${annCount} 筆公告事項</li>
-                    <li>${propCount} 筆主管會議提案</li>
-                </ul>
-                <div class="text-slate-500 mt-1 italic">刪除週次後，上述事項亦將一併刪除。</div>
-            `;
-
-            showConfirmModal({
-                title: '刪除當週行事曆確認',
-                message: `確定要刪除日新國小「${escapeHtml(weekLabel)}」的行事曆嗎？此操作無法復原。`,
-                detailsHtml: detailHtml,
-                okText: '確認刪除週次',
-                onConfirm: () => executeDeleteWeek(weekId)
-            });
-        }
-
-        function executeDeleteWeek(weekId) {
-            appData.weeks = appData.weeks.filter(w => w.id !== weekId);
-            appData.announcements = appData.announcements.filter(a => a.weekId !== weekId);
-            appData.proposals = appData.proposals.filter(p => p.weekId !== weekId);
-
-            if (appData.weeks.length === 0) {
-                const range = getWeekDateRange(new Date(), 0);
-                const fallbackWeek = {
-                    id: '113-1-1',
-                    year: 113,
-                    semester: 1,
-                    week: 1,
-                    title: '第1週 - 開學週',
-                    startDate: range.startDate,
-                    endDate: range.endDate,
-                    notes: '新學期開始'
-                };
-                appData.weeks.push(fallbackWeek);
-                appData.currentWeekId = '113-1-1';
-                showToast("已無預設週次，系統自動建立本週「第1週」！", "info");
-            } else if (appData.currentWeekId === weekId) {
-                appData.currentWeekId = appData.weeks[0].id;
-            }
-
-            saveStorageData();
-            renderHeaderWeeks();
-            updateCurrentWeekDisplay();
-            renderActiveTabContent();
-            if (!document.getElementById('weekListModal').classList.contains('hidden')) {
-                renderWeekTable();
-            }
-            showToast("已成功刪除該週次", "success");
-        }
-
-        function openWeekListModal() {
-            renderWeekTable();
-            openModal('weekListModal');
-        }
-
-        function renderWeekTable() {
-            const tbody = document.getElementById('weekTableBody');
-            tbody.innerHTML = '';
-
-            if (appData.weeks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無週次紀錄</td></tr>`;
-                return;
-            }
-
-            const todayStr = formatDateStr(new Date());
-
-            appData.weeks.forEach(w => {
-                const annCount = appData.announcements.filter(a => a.weekId === w.id).length;
-                const propCount = appData.proposals.filter(p => p.weekId === w.id).length;
-                const isSelected = (w.id === appData.currentWeekId);
-                const isTodayWeek = (todayStr >= w.startDate && todayStr <= w.endDate);
-
-                const tr = document.createElement('tr');
-                tr.className = isSelected ? 'bg-rixinRed-50/60 font-medium' : 'hover:bg-slate-50';
-
-                tr.innerHTML = `
-                    <td class="p-2.5">
-                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
-                            ${isSelected ? '<span class="w-2 h-2 rounded-full bg-rixinRed-600"></span>' : ''}
-                            ${escapeHtml(w.title || `第${w.week}週`)}
-                            ${isTodayWeek ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold border border-emerald-300">[本週]</span>' : ''}
-                        </div>
-                        <div class="text-[10px] text-slate-400">${w.year}學年 第${w.semester}學期</div>
-                    </td>
-                    <td class="p-2.5 whitespace-nowrap text-slate-600">${w.startDate} ~ ${w.endDate}</td>
-                    <td class="p-2.5 text-slate-600 max-w-[180px] truncate" title="${escapeHtml(w.notes || '')}">${escapeHtml(w.notes || '—')}</td>
-                    <td class="p-2.5 text-center font-bold text-indigo-600">${annCount}</td>
-                    <td class="p-2.5 text-center font-bold text-emerald-600">${propCount}</td>
-                    <td class="p-2.5 text-center whitespace-nowrap">
-                        <button onclick="closeModal('weekListModal'); openEditWeekModal('${w.id}')" class="p-1 text-slate-500 hover:text-indigo-600 transition mr-1" title="編輯">
-                            <i data-lucide="pencil" class="w-4 h-4 inline"></i>
-                        </button>
-                        <button onclick="promptDeleteWeek('${w.id}')" class="p-1 text-slate-500 hover:text-rose-600 transition" title="刪除">
-                            <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            lucide.createIcons();
-        }
-
-        // ==================== TAB 1: RENDER ANNOUNCEMENTS ====================
         function renderAnnouncements() {
             const list = document.getElementById('announcementList');
             const items = getFilteredAnnouncements();
-            updateBadges();
 
             if (items.length === 0) {
                 list.innerHTML = `
                     <div class="bg-white rounded-xl p-12 text-center border border-slate-200">
                         <i data-lucide="inbox" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
-                        <p class="text-slate-500 text-sm font-medium">日新國小輔導室 本週尚無符合條件的公告事項</p>
+                        <p class="text-slate-500 text-sm font-medium">日新國小輔導室 本週尚無公告事項</p>
                         <p class="text-slate-400 text-xs mt-1">點擊右上方「新增公告事項」開始填寫內容</p>
                     </div>
                 `;
@@ -1521,11 +1722,9 @@
             lucide.createIcons();
         }
 
-        // ==================== TAB 2: RENDER PROPOSALS ====================
         function renderProposals() {
             const list = document.getElementById('proposalList');
             const items = getFilteredProposals();
-            updateBadges();
 
             if (items.length === 0) {
                 list.innerHTML = `
@@ -1548,7 +1747,6 @@
                 if (p.status === '執行中') statusBadge = 'bg-indigo-100 text-indigo-800 border-indigo-300 font-bold';
                 if (p.status === '報局核備中') statusBadge = 'bg-teal-100 text-teal-800 border-teal-300 font-bold';
                 if (p.status === '主管會議討論中') statusBadge = 'bg-amber-100 text-amber-800 border-amber-300 font-bold';
-                if (p.status === '研擬中') statusBadge = 'bg-slate-100 text-slate-800 border-slate-300 font-bold';
 
                 html += `
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 relative overflow-hidden">
@@ -1609,14 +1807,15 @@
             lucide.createIcons();
         }
 
-        // ==================== TAB 3: RENDER REPORT & PRINT ====================
         function renderReport() {
             const paper = document.getElementById('reportPaper');
             const reportType = document.querySelector('input[name="reportType"]:checked')?.value || 'full';
-            const currentWeek = appData.weeks.find(w => w.id === appData.currentWeekId) || appData.weeks[0];
+            const currentWeek = state.weeks.find(w => w.id === state.currentWeekId) || state.weeks[0];
 
-            const announcements = appData.announcements.filter(a => a.weekId === appData.currentWeekId);
-            const proposals = appData.proposals.filter(p => p.weekId === appData.currentWeekId);
+            if (!currentWeek) return;
+
+            const announcements = state.announcements.filter(a => a.weekId === state.currentWeekId);
+            const proposals = state.proposals.filter(p => p.weekId === state.currentWeekId);
 
             const weekTitle = currentWeek.title ? currentWeek.title : `${currentWeek.year}學年度 第${currentWeek.semester}學期 第${currentWeek.week}週`;
 
@@ -1633,8 +1832,6 @@
             `;
 
             if (reportType === 'full' || reportType === 'executive') {
-                
-                // Section 1: Weekly Announcements
                 if (reportType === 'full') {
                     html += `
                         <div class="mb-8">
@@ -1672,7 +1869,6 @@
                     html += `</div>`;
                 }
 
-                // Section 2: Executive Meeting Proposals
                 html += `
                     <div class="mb-8">
                         <h2 class="text-base font-bold text-slate-900 mb-3 border-l-4 border-rixinRed-700 pl-2 flex items-center gap-2">
@@ -1721,7 +1917,6 @@
                 html += `</div>`;
             }
 
-            // Paper Official Signature Block
             html += `
                 <div class="mt-12 pt-6 border-t border-slate-400 grid grid-cols-3 gap-4 text-center text-xs text-slate-800 font-bold">
                     <div>紀錄 / 擬辦：_________________</div>
@@ -1733,11 +1928,12 @@
             paper.innerHTML = html;
         }
 
-        // Copy Text formatted for LINE / Chat groups
         function copyFormattedText() {
-            const currentWeek = appData.weeks.find(w => w.id === appData.currentWeekId) || appData.weeks[0];
-            const announcements = appData.announcements.filter(a => a.weekId === appData.currentWeekId);
-            const proposals = appData.proposals.filter(p => p.weekId === appData.currentWeekId);
+            const currentWeek = state.weeks.find(w => w.id === state.currentWeekId) || state.weeks[0];
+            if (!currentWeek) return;
+
+            const announcements = state.announcements.filter(a => a.weekId === state.currentWeekId);
+            const proposals = state.proposals.filter(p => p.weekId === state.currentWeekId);
 
             const weekTitle = currentWeek.title ? currentWeek.title : `${currentWeek.year}學年度 第${currentWeek.semester}學期 第${currentWeek.week}週`;
 
@@ -1784,14 +1980,13 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                showToast("已成功複製日新國小輔導室廣播訊息至剪貼簿！", "success");
+                showToast("已成功複製日新國小輔導室廣播訊息！", "success");
             } catch (err) {
-                showToast("複製失敗，請手動複製", "error");
+                showToast("複製失敗", "error");
             }
             document.body.removeChild(textArea);
         }
 
-        // Single Item Copy
         function copySingleItem(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
@@ -1806,280 +2001,133 @@
             document.body.removeChild(textArea);
         }
 
-        // ==================== ANNOUNCEMENT ACTIONS ====================
-        function openAnnouncementModal(data = null) {
+        function editAnnouncement(id) {
+            const item = state.announcements.find(a => a.id === id);
+            if (!item) return;
+
+            document.getElementById('announcementModalTitle').textContent = "編輯公告事項";
+            document.getElementById('announcementId').value = item.id;
+            document.getElementById('announcementGroup').value = item.groupId;
+            document.getElementById('announcementTitle').value = item.title;
+            document.getElementById('announcementTarget').value = item.target;
+            document.getElementById('announcementPriority').value = item.priority;
+            document.getElementById('announcementStatus').value = item.status || '進行中';
+            document.getElementById('announcementEventDate').value = item.eventDate || '';
+            document.getElementById('announcementEventTime').value = item.eventTime || '';
+            document.getElementById('announcementContent').value = item.content;
+
+            openModal('announcementModal');
+        }
+
+        function openAnnouncementModal() {
             document.getElementById('announcementForm').reset();
-            if (data) {
-                document.getElementById('announcementModalTitle').textContent = "編輯公告事項";
-                document.getElementById('announcementId').value = data.id;
-                document.getElementById('announcementGroup').value = data.groupId;
-                document.getElementById('announcementTitle').value = data.title;
-                document.getElementById('announcementTarget').value = data.target;
-                document.getElementById('announcementPriority').value = data.priority;
-                document.getElementById('announcementStatus').value = data.status || '進行中';
-                document.getElementById('announcementEventDate').value = data.eventDate || '';
-                document.getElementById('announcementEventTime').value = data.eventTime || '';
-                document.getElementById('announcementContent').value = data.content;
-            } else {
-                document.getElementById('announcementModalTitle').textContent = "新增公告事項";
-                document.getElementById('announcementId').value = '';
-                document.getElementById('announcementEventDate').value = '';
-                document.getElementById('announcementEventTime').value = '';
-                if (appData.selectedRole !== 'all') {
-                    document.getElementById('announcementGroup').value = appData.selectedRole;
-                }
+            document.getElementById('announcementModalTitle').textContent = "新增公告事項";
+            document.getElementById('announcementId').value = '';
+            document.getElementById('announcementEventDate').value = '';
+            document.getElementById('announcementEventTime').value = '';
+            if (state.selectedRole !== 'all') {
+                document.getElementById('announcementGroup').value = state.selectedRole;
             }
             openModal('announcementModal');
         }
 
-        function saveAnnouncement(e) {
-            e.preventDefault();
-            const id = document.getElementById('announcementId').value;
-            const groupId = document.getElementById('announcementGroup').value;
-            const title = document.getElementById('announcementTitle').value.trim();
-            const target = document.getElementById('announcementTarget').value;
-            const priority = document.getElementById('announcementPriority').value;
-            const status = document.getElementById('announcementStatus').value;
-            const eventDate = document.getElementById('announcementEventDate').value;
-            const eventTime = document.getElementById('announcementEventTime').value.trim();
-            const content = document.getElementById('announcementContent').value.trim();
-
-            const now = new Date();
-            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-            if (id) {
-                const idx = appData.announcements.findIndex(a => a.id === id);
-                if (idx !== -1) {
-                    appData.announcements[idx] = { ...appData.announcements[idx], groupId, title, target, priority, status, eventDate, eventTime, content, updatedAt: timeStr };
-                }
-            } else {
-                const newAnn = {
-                    id: 'ann-' + Date.now(),
-                    weekId: appData.currentWeekId,
-                    groupId,
-                    title,
-                    target,
-                    priority,
-                    status,
-                    eventDate,
-                    eventTime,
-                    content,
-                    updatedAt: timeStr
-                };
-                appData.announcements.unshift(newAnn);
-            }
-
-            saveStorageData();
-            closeModal('announcementModal');
-            renderAnnouncements();
-            showToast("公告事項已成功儲存！");
-        }
-
-        function editAnnouncement(id) {
-            const item = appData.announcements.find(a => a.id === id);
-            if (item) openAnnouncementModal(item);
-        }
-
-        function promptDeleteAnnouncement(id) {
-            const item = appData.announcements.find(a => a.id === id);
+        function editProposal(id) {
+            const item = state.proposals.find(p => p.id === id);
             if (!item) return;
 
-            showConfirmModal({
-                title: '刪除公告確認',
-                message: `確定要刪除「${escapeHtml(item.title)}」嗎？`,
-                okText: '刪除公告',
-                onConfirm: () => {
-                    appData.announcements = appData.announcements.filter(a => a.id !== id);
-                    saveStorageData();
-                    renderAnnouncements();
-                    showToast("已刪除該筆公告事項");
-                }
-            });
+            document.getElementById('proposalModalTitle').textContent = "編輯主管會議提案";
+            document.getElementById('proposalId').value = item.id;
+            document.getElementById('proposalGroup').value = item.groupId;
+            document.getElementById('proposalSubject').value = item.subject;
+            document.getElementById('proposalDescription').value = item.description;
+            document.getElementById('proposalAction').value = item.proposedAction;
+            document.getElementById('proposalPriority').value = item.priority || '普通';
+            document.getElementById('proposalStatus').value = item.status;
+            document.getElementById('proposalResolution').value = item.resolution || '';
+
+            openModal('proposalModal');
         }
 
-        // ==================== PROPOSAL ACTIONS ====================
-        function openProposalModal(data = null) {
+        function openProposalModal() {
             document.getElementById('proposalForm').reset();
-            if (data) {
-                document.getElementById('proposalModalTitle').textContent = "編輯主管會議提案";
-                document.getElementById('proposalId').value = data.id;
-                document.getElementById('proposalGroup').value = data.groupId;
-                document.getElementById('proposalSubject').value = data.subject;
-                document.getElementById('proposalDescription').value = data.description;
-                document.getElementById('proposalAction').value = data.proposedAction;
-                document.getElementById('proposalPriority').value = data.priority || '普通';
-                document.getElementById('proposalStatus').value = data.status;
-                document.getElementById('proposalResolution').value = data.resolution || '';
-            } else {
-                document.getElementById('proposalModalTitle').textContent = "新增主管會議提案";
-                document.getElementById('proposalId').value = '';
-                if (appData.selectedRole !== 'all') {
-                    document.getElementById('proposalGroup').value = appData.selectedRole;
-                }
+            document.getElementById('proposalModalTitle').textContent = "新增主管會議提案";
+            document.getElementById('proposalId').value = '';
+            if (state.selectedRole !== 'all') {
+                document.getElementById('proposalGroup').value = state.selectedRole;
             }
             openModal('proposalModal');
         }
 
-        function saveProposal(e) {
-            e.preventDefault();
-            const id = document.getElementById('proposalId').value;
-            const groupId = document.getElementById('proposalGroup').value;
-            const subject = document.getElementById('proposalSubject').value.trim();
-            const description = document.getElementById('proposalDescription').value.trim();
-            const proposedAction = document.getElementById('proposalAction').value.trim();
-            const priority = document.getElementById('proposalPriority').value;
-            const status = document.getElementById('proposalStatus').value;
-            const resolution = document.getElementById('proposalResolution').value.trim();
+        function openEditWeekModal(weekId) {
+            const week = state.weeks.find(w => w.id === weekId);
+            if (!week) return;
 
-            const now = new Date();
-            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('editWeekTargetId').value = week.id;
+            document.getElementById('editWeekYear').value = week.year;
+            document.getElementById('editWeekSemester').value = week.semester;
+            document.getElementById('editWeekNum').value = week.week;
+            document.getElementById('editWeekTitle').value = week.title || '';
+            document.getElementById('editWeekStartDate').value = week.startDate;
+            document.getElementById('editWeekEndDate').value = week.endDate;
+            document.getElementById('editWeekNotes').value = week.notes || '';
 
-            if (id) {
-                const idx = appData.proposals.findIndex(p => p.id === id);
-                if (idx !== -1) {
-                    appData.proposals[idx] = { ...appData.proposals[idx], groupId, subject, description, proposedAction, priority, status, resolution, updatedAt: timeStr };
-                }
-            } else {
-                const newProp = {
-                    id: 'prop-' + Date.now(),
-                    weekId: appData.currentWeekId,
-                    groupId,
-                    subject,
-                    description,
-                    proposedAction,
-                    priority,
-                    status,
-                    resolution,
-                    updatedAt: timeStr
-                };
-                appData.proposals.unshift(newProp);
-            }
-
-            saveStorageData();
-            closeModal('proposalModal');
-            renderProposals();
-            showToast("主管會議提案已成功儲存！");
+            openModal('editWeekModal');
         }
 
-        function editProposal(id) {
-            const item = appData.proposals.find(p => p.id === id);
-            if (item) openProposalModal(item);
+        function openWeekListModal() {
+            renderWeekTable();
+            openModal('weekListModal');
         }
 
-        function promptDeleteProposal(id) {
-            const item = appData.proposals.find(p => p.id === id);
-            if (!item) return;
+        function renderWeekTable() {
+            const tbody = document.getElementById('weekTableBody');
+            tbody.innerHTML = '';
 
-            showConfirmModal({
-                title: '刪除提案確認',
-                message: `確定要刪除主管會議提案「${escapeHtml(item.subject)}」嗎？`,
-                okText: '刪除提案',
-                onConfirm: () => {
-                    appData.proposals = appData.proposals.filter(p => p.id !== id);
-                    saveStorageData();
-                    renderProposals();
-                    showToast("已刪除該筆提案");
-                }
-            });
-        }
-
-        // ==================== NEW WEEK ====================
-        function saveNewWeek(e) {
-            e.preventDefault();
-            const year = parseInt(document.getElementById('newYear').value);
-            const semester = parseInt(document.getElementById('newSemester').value);
-            const week = parseInt(document.getElementById('newWeekNum').value);
-            const customTitle = document.getElementById('newWeekTitle').value.trim();
-            const startDate = document.getElementById('newStartDate').value;
-            const endDate = document.getElementById('newEndDate').value;
-            const notes = document.getElementById('newWeekNotes').value.trim();
-
-            const weekId = `${year}-${semester}-${week}`;
-            if (appData.weeks.some(w => w.id === weekId)) {
-                showToast("該週次號碼已存在！", "error");
+            if (state.weeks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">目前尚無週次紀錄</td></tr>`;
                 return;
             }
 
-            const newWeekObj = {
-                id: weekId,
-                year,
-                semester,
-                week,
-                title: customTitle || `第${week}週`,
-                startDate,
-                endDate,
-                notes
-            };
+            const todayStr = window.formatDateStr(new Date());
 
-            appData.weeks.push(newWeekObj);
-            appData.weeks.sort((a,b) => (a.year*1000 + a.semester*100 + a.week) - (b.year*1000 + b.semester*100 + b.week));
+            state.weeks.forEach(w => {
+                const annCount = state.announcements.filter(a => a.weekId === w.id).length;
+                const propCount = state.proposals.filter(p => p.weekId === w.id).length;
+                const isSelected = (w.id === state.currentWeekId);
+                const isTodayWeek = (todayStr >= w.startDate && todayStr <= w.endDate);
 
-            appData.currentWeekId = weekId;
-            saveStorageData();
-            closeModal('addWeekModal');
-            renderHeaderWeeks();
-            updateCurrentWeekDisplay();
-            renderActiveTabContent();
-            showToast(`已建立並切換至「${newWeekObj.title}」！`);
-        }
+                const tr = document.createElement('tr');
+                tr.className = isSelected ? 'bg-rixinRed-50/60 font-medium' : 'hover:bg-slate-50';
 
-        // Reset demo data
-        function promptResetDemoData() {
-            showConfirmModal({
-                title: '重置日新國小範例資料',
-                message: '確定要重置為預設的日新國小輔導室範例資料嗎？您目前的資料將被覆蓋。',
-                okText: '重置資料',
-                onConfirm: () => {
-                    appData = generateDefaultSeedState();
-                    saveStorageData();
-                    closeModal('backupModal');
-                    initApp();
-                    showToast("已成功重置為日新國小預設範例資料！");
-                }
+                tr.innerHTML = `
+                    <td class="p-2.5">
+                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                            ${isSelected ? '<span class="w-2 h-2 rounded-full bg-rixinRed-600"></span>' : ''}
+                            ${escapeHtml(w.title || `第${w.week}週`)}
+                            ${isTodayWeek ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold border border-emerald-300">[本週]</span>' : ''}
+                        </div>
+                        <div class="text-[10px] text-slate-400">${w.year}學年 第${w.semester}學期</div>
+                    </td>
+                    <td class="p-2.5 whitespace-nowrap text-slate-600">${w.startDate} ~ ${w.endDate}</td>
+                    <td class="p-2.5 text-slate-600 max-w-[180px] truncate" title="${escapeHtml(w.notes || '')}">${escapeHtml(w.notes || '—')}</td>
+                    <td class="p-2.5 text-center font-bold text-indigo-600">${annCount}</td>
+                    <td class="p-2.5 text-center font-bold text-emerald-600">${propCount}</td>
+                    <td class="p-2.5 text-center whitespace-nowrap">
+                        <button onclick="closeModal('weekListModal'); openEditWeekModal('${w.id}')" class="p-1 text-slate-500 hover:text-indigo-600 transition mr-1" title="編輯">
+                            <i data-lucide="pencil" class="w-4 h-4 inline"></i>
+                        </button>
+                        <button onclick="promptDeleteWeek('${w.id}')" class="p-1 text-slate-500 hover:text-rose-600 transition" title="刪除">
+                            <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
+
+            lucide.createIcons();
         }
 
-        // ==================== JSON BACKUP / RESTORE ====================
-        function exportJSONData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `日新國小輔導室事項管理備份_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("備份 JSON 檔案已下載成功！");
-        }
-
-        function importJSONData() {
-            const fileInput = document.getElementById('importFileInput');
-            const file = fileInput.files[0];
-            if (!file) {
-                showToast("請先選擇要匯入的 JSON 檔案！", "error");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (parsed && Array.isArray(parsed.weeks) && Array.isArray(parsed.announcements)) {
-                        appData = parsed;
-                        saveStorageData();
-                        closeModal('backupModal');
-                        initApp();
-                        showToast("已成功復原日新國小輔導室資料！", "success");
-                    } else {
-                        showToast("匯入檔案格式不符！", "error");
-                    }
-                } catch (err) {
-                    showToast("JSON 解析失敗，請檢查檔案內容", "error");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // ==================== CONFIRM MODAL SYSTEM ====================
+        // Modal Helpers
         function showConfirmModal({ title, message, detailsHtml = '', okText = '確認', onConfirm }) {
             document.getElementById('confirmModalTitle').innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i> ${escapeHtml(title)}`;
             document.getElementById('confirmModalMessage').textContent = message;
@@ -2104,7 +2152,6 @@
             lucide.createIcons();
         }
 
-        // ==================== MODAL HELPERS ====================
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
         }
@@ -2113,7 +2160,6 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        // ==================== TOAST NOTIFICATIONS ====================
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -2138,7 +2184,6 @@
             }, 3000);
         }
 
-        // HTML Sanitizer
         function escapeHtml(str) {
             if (!str) return '';
             return str
@@ -2148,11 +2193,6 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
-
-        // On DOM Load
-        window.addEventListener('DOMContentLoaded', () => {
-            initApp();
-        });
     </script>
 </body>
 </html>
