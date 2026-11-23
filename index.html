@@ -6,215 +6,367 @@
   <title>臺北市日新國小 輔導室事項管理系統 (雲端即時多人協作版)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Font: Inter & Noto Sans TC -->
+  <!-- Google Fonts: Noto Sans TC & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+          },
           colors: {
             rixin: {
-              red: '#b91c1c',
-              redlight: '#dc2626',
-              reddark: '#991b1b',
-              navy: '#0f172a',
-              navylight: '#1e293b',
-              accent: '#38bdf8'
+              red: '#cc0000',
+              reddark: '#990000',
+              navy: '#1e293b',
+              navyline: '#0f172a',
             }
-          },
-          fontFamily: {
-            sans: ['"Noto Sans TC"', 'Inter', 'sans-serif']
           }
         }
       }
     }
   </script>
-
   <style>
-    /* Custom Scrollbar & Print Styling */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    /* Print styling */
-    @media print {
-      body { background: #ffffff !important; color: #000000 !important; font-size: 11pt; }
-      .no-print { display: none !important; }
-      .print-only { display: block !important; }
-      .page-break { page-break-before: always; }
-      .shadow-md, .shadow-lg, .shadow-sm { box-shadow: none !important; }
-      .border-gray-200, .border-slate-700 { border-color: #94a3b8 !important; }
-      .card-print { break-inside: avoid; border: 1pt solid #ccc !important; margin-bottom: 12pt; }
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
     }
-    .print-only { display: none; }
+    
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Strict A4 Print Styling */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 14mm;
+      }
+      
+      html, body {
+        background: #ffffff !important;
+        color: #111827 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Hide everything except print area */
+      #appShell,
+      .modal-overlay,
+      #toastContainer,
+      .no-print {
+        display: none !important;
+      }
+
+      /* Printable Area container */
+      #printArea {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+      }
+
+      /* Print Table Styles */
+      .print-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+        margin-top: 8px !important;
+        margin-bottom: 16px !important;
+      }
+
+      .print-table th, 
+      .print-table td {
+        border: 1px solid #374151 !important;
+        padding: 6px 8px !important;
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        color: #111827 !important;
+        vertical-align: top !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+        white-space: pre-wrap !important;
+      }
+
+      .print-table th {
+        background-color: #f3f4f6 !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+      }
+
+      .print-table thead {
+        display: table-header-group !important;
+      }
+
+      .print-table tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .print-section-header {
+        font-size: 13pt !important;
+        font-weight: 800 !important;
+        margin-top: 14px !important;
+        margin-bottom: 6px !important;
+        color: #0f172a !important;
+        border-bottom: 2px solid #1e293b !important;
+        padding-bottom: 2px !important;
+        break-after: avoid !important;
+      }
+
+      .print-signature-block {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        margin-top: 24px !important;
+        padding-top: 12px !important;
+        width: 100% !important;
+      }
+    }
+
+    /* Screen display of print area hidden by default */
+    #printArea {
+      display: none;
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="min-h-screen flex flex-col antialiased selection:bg-red-100 selection:text-red-900">
 
-  <!-- ==================== HEADER ==================== -->
-  <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800 sticky top-0 z-30 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <!-- ==================== MAIN APPLICATION SHELL ==================== -->
+  <div id="appShell" class="flex-grow flex flex-col">
+    
+    <!-- TOP HEADER / BRANDING BANNER -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-lg sticky top-0 z-30 border-b border-slate-700/60">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-3">
         
-        <!-- Left Title & Logo -->
-        <div class="flex items-center gap-3">
-          <!-- Rixin Sunburst Logo (SVG) -->
-          <svg class="w-10 h-10 shrink-0 drop-shadow-md" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- 16-point star background -->
-            <path d="M50 2 L56 18 L71 7 L70 24 L87 20 L80 36 L98 38 L86 50 L98 62 L80 64 L87 80 L70 76 L71 93 L56 82 L50 98 L44 82 L29 93 L30 76 L13 80 L20 64 L2 62 L14 50 L2 38 L20 36 L13 20 L30 24 L29 7 L44 18 Z" fill="#b91c1c" stroke="#991b1b" stroke-width="2"/>
-            <path d="M50 6 L54 20 L66 11 L65 25 L79 22 L73 35 L88 37 L78 47 L88 57 L73 59 L79 72 L65 69 L66 83 L54 74 L50 88 L46 74 L34 83 L35 69 L21 72 L27 59 L12 57 L22 47 L12 37 L27 35 L21 22 L35 25 L34 11 L46 20 Z" fill="#dc2626"/>
-            <!-- Outer white ring -->
-            <circle cx="50" cy="50" r="30" fill="#ffffff" stroke="#991b1b" stroke-width="3"/>
-            <!-- Inner red circle -->
-            <circle cx="50" cy="50" r="24" fill="#b91c1c"/>
-            <!-- Chinese Characters 日新 -->
-            <text x="50" y="44" font-family="'Noto Sans TC', sans-serif" font-weight="900" font-size="17" fill="#ffffff" text-anchor="middle" dominant-baseline="central">日</text>
-            <text x="50" y="61" font-family="'Noto Sans TC', sans-serif" font-weight="900" font-size="17" fill="#ffffff" text-anchor="middle" dominant-baseline="central">新</text>
-          </svg>
-          
+        <!-- Brand Title & Logo -->
+        <div class="flex items-center gap-3.5">
+          <!-- Rixin Emblem SVG -->
+          <div class="relative flex-shrink-0 bg-white p-1.5 rounded-full shadow-md border-2 border-red-600 flex items-center justify-center w-12 h-12">
+            <svg class="w-9 h-9" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- 12-Point Swallowtail Sunburst Rays -->
+              <g fill="#cc0000">
+                <path d="M50 2 L56 22 L72 8 L68 28 L88 20 L76 38 L98 36 L80 50 L98 64 L76 62 L88 80 L68 72 L72 92 L56 78 L50 98 L44 78 L28 92 L32 72 L12 80 L24 62 L2 64 L20 50 L2 36 L24 38 L12 20 L32 28 L28 8 L44 22 Z"/>
+              </g>
+              <!-- Outer White Rim -->
+              <circle cx="50" cy="50" r="32" fill="#ffffff"/>
+              <!-- Red Inner Circle -->
+              <circle cx="50" cy="50" r="28" fill="#cc0000"/>
+              <!-- White Text "日新" -->
+              <text x="50" y="44" font-family="'Noto Sans TC', sans-serif" font-weight="900" font-size="20" fill="#ffffff" text-anchor="middle" dominant-baseline="central">日</text>
+              <text x="50" y="62" font-family="'Noto Sans TC', sans-serif" font-weight="900" font-size="20" fill="#ffffff" text-anchor="middle" dominant-baseline="central">新</text>
+            </svg>
+          </div>
+
           <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="bg-red-700 text-white text-xs font-extrabold px-2 py-0.5 rounded tracking-wide uppercase">臺北市</span>
-              <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white">
-                日新國小 <span class="text-red-400 font-bold">輔導室事項管理系統</span>
-              </h1>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold px-2 py-0.5 rounded bg-red-600 text-white tracking-wide">臺北市大同區</span>
+              <span id="syncStatusBadge" class="text-xs font-medium px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30 cursor-pointer hover:bg-amber-500/30 transition-all" onclick="openFirebaseInfoModal()">
+                🟡 正在連線雲端...
+              </span>
             </div>
-            <!-- Cloud Connection Status Indicator -->
-            <div class="flex items-center gap-2 mt-0.5">
-              <button id="connectionStatusBtn" onclick="openDiagnosticModal()" class="text-xs flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
-                <span id="connectionDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span id="connectionText" class="text-slate-300 font-medium">連線中...</span>
-              </button>
-              <span class="text-slate-400 text-xs hidden sm:inline">| 雲端即時多人協作版 v2.5</span>
-            </div>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-100 flex items-center gap-2 mt-0.5">
+              日新國民小學 輔導室事項管理系統
+              <span class="hidden lg:inline-block text-xs font-normal text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-700">雲端即時多人協作版</span>
+            </h1>
           </div>
         </div>
 
-        <!-- Right Quick Actions -->
-        <div class="flex items-center gap-2 flex-wrap justify-end">
-          <button onclick="copyLineMessage()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs sm:text-sm px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 5.92 2 10.75c0 3.2 2.05 6 5.17 7.5-.23.86-.83 3.12-.86 3.32 0 0-.02.16.08.22.1.06.22.01.22.01.3-.04 3.48-2.3 4.88-3.23.83.12 1.67.18 2.51.18 5.52 0 10-3.92 10-8.75S17.52 2 12 2z"/></svg>
-            一鍵複製 LINE 訊息
+        <!-- System Quick Actions & Backup Controls -->
+        <div class="flex items-center flex-wrap gap-2 text-xs">
+          <button onclick="openModal('modalManageWeeks')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-600 transition font-medium flex items-center gap-1.5 shadow-sm">
+            ⚙️ 週次總表
           </button>
-
-          <!-- Week Dropdown Quick Switcher -->
-          <div class="relative inline-block text-left">
-            <select id="weekSelector" onchange="switchWeek(this.value)" class="bg-slate-800 text-slate-100 border border-slate-700 rounded-lg text-xs sm:text-sm font-semibold px-3 py-2 focus:ring-2 focus:ring-red-500 focus:outline-none cursor-pointer">
-              <!-- Dynamically populated -->
-            </select>
-          </div>
-
-          <button onclick="goToCurrentWeek()" title="自動對應今天日期" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs sm:text-sm px-2.5 py-2 rounded-lg transition font-medium">
-            📍 回到本週
+          <button onclick="copyLineBroadcastText()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg transition font-medium flex items-center gap-1.5 shadow-sm">
+            💬 複製 LINE 訊息
           </button>
-
-          <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs sm:text-sm px-3 py-2 rounded-lg transition font-medium flex items-center gap-1">
+          <button onclick="openPrintModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition font-medium flex items-center gap-1.5 shadow-sm">
             🖨️ 列印週報
           </button>
-        </div>
 
-      </div>
-    </div>
-  </header>
-
-  <!-- ==================== SUB-HEADER / WEEK BANNER ==================== -->
-  <section class="bg-white border-b border-slate-200 shadow-sm no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        
-        <!-- Current Selected Week Info -->
-        <div class="flex items-center gap-3 flex-wrap">
-          <span id="currentWeekBadge" class="bg-red-700 text-white font-black text-base px-3 py-1 rounded-lg shadow-sm">
-            第 13 週
-          </span>
-          <span id="currentSemesterBadge" class="bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs px-2.5 py-1 rounded-md">
-            115學年度第1學期
-          </span>
-          <span id="currentDateRange" class="text-slate-600 font-medium text-sm">
-            📅 2026/11/23 (一) ～ 2026/11/29 (日)
-          </span>
-          <div id="currentWeekNote" class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-md font-medium hidden sm:block">
-            📌 本週重點：進行性平與生命教育宣導週
+          <!-- Backup Dropdown / Action -->
+          <div class="relative inline-block text-left">
+            <button onclick="toggleExportImportMenu()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-600 transition font-medium flex items-center gap-1">
+              📁 備份 / 匯入
+            </button>
+            <div id="exportImportMenu" class="hidden absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl border border-slate-200 z-50 text-slate-700 text-xs py-1">
+              <button onclick="exportBackupJSON(); hideExportImportMenu();" class="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2">
+                📥 匯出資料庫 (JSON)
+              </button>
+              <label class="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer">
+                📤 匯入備份檔 (JSON)
+                <input type="file" id="importJsonInput" accept=".json" class="hidden" onchange="importBackupJSON(event)">
+              </label>
+            </div>
           </div>
         </div>
 
-        <!-- Management Tools -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <button onclick="openEditWeekModal()" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-2.5 py-1.5 rounded-md transition flex items-center gap-1">
-            ✏️ 編輯當週行事
-          </button>
-          <button onclick="openWeekManagerModal()" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-2.5 py-1.5 rounded-md transition flex items-center gap-1">
-            ⚙️ 週次總表管理
-          </button>
-          <button onclick="exportDataJSON()" class="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 px-2 py-1.5 rounded-md transition">
-            📥 匯出備份
-          </button>
-          <button onclick="triggerImportJSON()" class="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 px-2 py-1.5 rounded-md transition">
-            📤 匯入備份
-          </button>
-          <input type="file" id="importJsonInput" accept=".json" class="hidden" onchange="importDataJSON(event)" />
-        </div>
-
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- ==================== MAIN CONTENT AREA ==================== -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-    <!-- Group Filter Pills -->
-    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 no-print flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2 flex-wrap" id="groupFilterContainer">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">處室組別：</span>
-        <button onclick="filterGroup('ALL')" data-group="ALL" class="group-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-900 text-white shadow-sm">
-          檢視全部組別
-        </button>
-        <button onclick="filterGroup('輔導主任')" data-group="輔導主任" class="group-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200">
-          輔導主任
-        </button>
-        <button onclick="filterGroup('特教組')" data-group="特教組" class="group-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200">
-          特教組
-        </button>
-        <button onclick="filterGroup('輔導組')" data-group="輔導組" class="group-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200">
-          輔導組
-        </button>
-        <button onclick="filterGroup('資註組')" data-group="資註組" class="group-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200">
-          資註組
-        </button>
-      </div>
-
-      <!-- Section Navigation Tabs -->
-      <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
-        <button onclick="switchMainTab('announcements')" id="tabBtnAnnouncements" class="px-4 py-1.5 rounded-md text-xs font-extrabold transition bg-white text-slate-900 shadow-sm flex items-center gap-1.5">
-          📢 每週公告事項
-          <span id="announcementBadgeCount" class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
-        </button>
-        <button onclick="switchMainTab('proposals')" id="tabBtnProposals" class="px-4 py-1.5 rounded-md text-xs font-extrabold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
-          🏛️ 主管會議提案與決議
-          <span id="proposalBadgeCount" class="bg-slate-300 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full">0</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- TAB 1: ANNOUNCEMENTS SECTION -->
-    <section id="tabAnnouncements" class="space-y-4">
-      
-      <!-- Filter Bar -->
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 flex-grow">
-          <!-- Keyword Search -->
-          <div class="relative">
-            <input type="text" id="searchInput" oninput="renderAnnouncements()" placeholder="🔍 搜尋標題或細節..." class="w-full pl-3 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
-          </div>
+    <!-- WEEK SELECTION & NAV BAR -->
+    <section class="bg-white border-b border-slate-200 shadow-sm sticky top-[61px] z-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           
-          <!-- Target Audience Dropdown (UPDATED: includes 行政人員 & 主管會議) -->
-          <div>
-            <select id="targetFilter" onchange="renderAnnouncements()" class="w-full py-2 px-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white font-medium">
-              <option value="ALL">🎯 全部公告對象</option>
+          <!-- Week Selector Controls -->
+          <div class="flex items-center flex-wrap gap-2">
+            <!-- Prev Week Button -->
+            <button onclick="navigateWeek(-1)" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center justify-center font-semibold disabled:opacity-40 disabled:cursor-not-allowed" title="前一週">
+              ◀
+            </button>
+
+            <!-- Week Select Dropdown -->
+            <div class="relative flex-grow sm:flex-grow-0 min-w-[200px]">
+              <select id="selectWeek" onchange="handleWeekChange(this.value)" class="w-full pl-3 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer">
+                <option value="">載入週次中...</option>
+              </select>
+            </div>
+
+            <!-- Next Week Button -->
+            <button onclick="navigateWeek(1)" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center justify-center font-semibold disabled:opacity-40 disabled:cursor-not-allowed" title="下一週">
+              ▶
+            </button>
+
+            <!-- "Back to Current Week" Button -->
+            <button id="btnJumpToCurrentWeek" onclick="jumpToCurrentWeek()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg font-bold text-xs transition flex items-center gap-1.5 shadow-xs">
+              📍 回到本週
+            </button>
+
+            <!-- Add New Week Button -->
+            <button onclick="openModal('modalAddWeek')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium text-xs transition flex items-center gap-1">
+              ＋ 新增週次
+            </button>
+          </div>
+
+          <!-- Current Selected Week Details Pill -->
+          <div id="currentWeekDetailsBanner" class="flex items-center flex-wrap gap-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200">
+            <!-- Dynamic info inserted by JS -->
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- OFFICE GROUP FILTER TABS -->
+    <section class="bg-slate-100 border-b border-slate-200 py-2.5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto">
+            <span class="text-xs font-bold text-slate-500 mr-1 flex-shrink-0">處室組別：</span>
+            
+            <button onclick="setGroupFilter('ALL')" id="filter-ALL" class="group-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-slate-800 text-white shadow-sm">
+              🏢 全處室總覽
+            </button>
+
+            <button onclick="setGroupFilter('輔導主任')" id="filter-輔導主任" class="group-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 bg-white text-indigo-700 hover:bg-indigo-50 border border-slate-200">
+              <span class="w-2 h-2 rounded-full bg-indigo-600"></span> 輔導主任
+            </button>
+
+            <button onclick="setGroupFilter('特教組')" id="filter-特教組" class="group-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 bg-white text-purple-700 hover:bg-purple-50 border border-slate-200">
+              <span class="w-2 h-2 rounded-full bg-purple-600"></span> 特教組
+            </button>
+
+            <button onclick="setGroupFilter('輔導組')" id="filter-輔導組" class="group-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 bg-white text-emerald-700 hover:bg-emerald-50 border border-slate-200">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span> 輔導組
+            </button>
+
+            <button onclick="setGroupFilter('資註組')" id="filter-資註組" class="group-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 bg-white text-cyan-700 hover:bg-cyan-50 border border-slate-200">
+              <span class="w-2 h-2 rounded-full bg-cyan-600"></span> 資註組
+            </button>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="text-xs text-slate-500 font-medium flex items-center gap-3">
+            <span>📢 公告 <strong id="statAnnouncementCount" class="text-slate-800">0</strong> 則</span>
+            <span>📝 提案 <strong id="statProposalCount" class="text-slate-800">0</strong> 案</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN WORKSPACE CONTENT AREA -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+      
+      <!-- DATABASE EMPTY STATE BANNER (Shown when database has no weeks) -->
+      <div id="emptyDatabaseContainer" class="hidden mb-8 p-8 bg-white rounded-2xl border-2 border-dashed border-slate-300 text-center shadow-sm max-w-2xl mx-auto my-12">
+        <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+          📅
+        </div>
+        <h3 class="text-xl font-bold text-slate-800 mb-2">目前資料庫尚無週次紀錄</h3>
+        <p class="text-slate-600 text-sm mb-6 max-w-md mx-auto">
+          系統目前完全乾淨，沒有預設或範例週次。請點擊上方或下方按鈕新增本學期的第一個週次。
+        </p>
+        <button onclick="openModal('modalAddWeek')" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl shadow-md transition inline-flex items-center gap-2">
+          ＋ 新增第一個週次
+        </button>
+      </div>
+
+      <!-- MAIN CONTENT GRID (Announcements & Proposals) -->
+      <div id="mainContentGrid" class="space-y-8">
+
+        <!-- ================= SECTION 1: ANNOUNCEMENTS ================= -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          
+          <!-- Section Header -->
+          <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-indigo-100 text-indigo-700 rounded-lg">
+                📢
+              </div>
+              <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  壹、每週處室公告事項
+                  <span id="badgeFilteredGroupAnnouncements" class="text-xs font-normal text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                    全處室彙整
+                  </span>
+                </h2>
+                <p class="text-xs text-slate-500">提供各組同仁發布本週宣導、活動時程與配合事項</p>
+              </div>
+            </div>
+
+            <button onclick="openModal('modalAddAnnouncement')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg transition shadow-xs flex items-center justify-center gap-1.5">
+              ＋ 新增公告事項
+            </button>
+          </div>
+
+          <!-- Announcement Filters & Search Bar -->
+          <div class="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-wrap items-center gap-3 text-xs">
+            <!-- Search -->
+            <div class="relative flex-grow max-w-xs">
+              <input type="text" id="searchAnnouncementQuery" oninput="renderAnnouncements()" placeholder="搜尋公告關鍵字..." class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+              <span class="absolute left-2.5 top-2 text-slate-400">🔍</span>
+            </div>
+
+            <!-- Target Audience Filter -->
+            <select id="filterAnnouncementAudience" onchange="renderAnnouncements()" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">所有對象</option>
               <option value="全校教職員">全校教職員</option>
               <option value="行政人員">行政人員</option>
               <option value="主管會議">主管會議</option>
@@ -225,239 +377,163 @@
               <option value="家長">家長</option>
               <option value="學生">學生</option>
             </select>
-          </div>
 
-          <!-- Priority Dropdown -->
-          <div>
-            <select id="priorityFilter" onchange="renderAnnouncements()" class="w-full py-2 px-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white font-medium">
-              <option value="ALL">⚡ 全部優先程度</option>
+            <!-- Priority Filter -->
+            <select id="filterAnnouncementPriority" onchange="renderAnnouncements()" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">所有優先度</option>
               <option value="緊急">🔴 緊急</option>
               <option value="重要">🟠 重要</option>
-              <option value="普通">🔵 普通</option>
+              <option value="普通">🔹 普通</option>
             </select>
-          </div>
 
-          <!-- Status Dropdown -->
-          <div>
-            <select id="statusFilter" onchange="renderAnnouncements()" class="w-full py-2 px-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white font-medium">
-              <option value="ALL">📋 全部辦理狀態</option>
+            <!-- Status Filter -->
+            <select id="filterAnnouncementStatus" onchange="renderAnnouncements()" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500">
+              <option value="ALL">所有狀態</option>
               <option value="進行中">進行中</option>
               <option value="已完成">已完成</option>
               <option value="延期">延期</option>
               <option value="取消">取消</option>
             </select>
           </div>
-        </div>
 
-        <!-- Add Button -->
-        <button onclick="openAddAnnouncementModal()" class="bg-red-700 hover:bg-red-600 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow transition flex items-center justify-center gap-1.5 shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-          新增公告事項
-        </button>
+          <!-- Announcement List Container -->
+          <div id="announcementList" class="divide-y divide-slate-100 p-2 sm:p-4 min-h-[140px]">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
+
+        <!-- ================= SECTION 2: EXECUTIVE PROPOSALS ================= -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          
+          <!-- Section Header -->
+          <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                📝
+              </div>
+              <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  貳、主管會議提案與決議事項
+                  <span id="badgeFilteredGroupProposals" class="text-xs font-normal text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    全處室彙整
+                  </span>
+                </h2>
+                <p class="text-xs text-slate-500">紀錄提報至每週校長/主管會議之討論案與最終決議</p>
+              </div>
+            </div>
+
+            <button onclick="openModal('modalAddProposal')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg transition shadow-xs flex items-center justify-center gap-1.5">
+              ＋ 新增提案與決議
+            </button>
+          </div>
+
+          <!-- Proposal List Container -->
+          <div id="proposalList" class="divide-y divide-slate-100 p-2 sm:p-4 min-h-[140px]">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
+
       </div>
+    </main>
 
-      <!-- Announcements Card List -->
-      <div id="announcementsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Dynamic Content -->
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4">
+        <p>臺北市大同區日新國民小學 輔導室版權所有 &copy; 2026 | 雲端即時多人協作系統</p>
       </div>
-    </section>
-
-    <!-- TAB 2: PROPOSALS SECTION -->
-    <section id="tabProposals" class="space-y-4 hidden">
-      <!-- Proposal Header / Controls -->
-      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-            🏛️ 主管會議提案列管與會後決議紀錄
-          </h3>
-          <p class="text-xs text-slate-500">供輔導室各組於校務主管會議前進行提案登記，會議後填寫決議與追蹤狀態。</p>
-        </div>
-        <button onclick="openAddProposalModal()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow transition flex items-center justify-center gap-1.5 shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-          新增主管會議提案
-        </button>
-      </div>
-
-      <!-- Proposals Card List -->
-      <div id="proposalsList" class="space-y-4">
-        <!-- Dynamic Content -->
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ==================== A4 PRINT SECTION (PRINT ONLY) ==================== -->
-  <div class="print-only p-8 max-w-4xl mx-auto">
-    <div class="text-center border-b-2 border-slate-900 pb-4 mb-6">
-      <h1 class="text-2xl font-black tracking-wide">臺北市大同區日新國民小學 輔導室工作週報</h1>
-      <h2 id="printWeekHeader" class="text-lg font-bold text-slate-700 mt-1">115學年度第1學期 第13週 處室每週公告與主管會議決議表</h2>
-      <p id="printDateHeader" class="text-xs text-slate-500 mt-1">列印日期：2026/11/23</p>
-    </div>
-
-    <!-- Print Focus Note -->
-    <div id="printFocusNoteBlock" class="mb-6 p-3 border border-slate-400 bg-slate-50 rounded">
-      <strong class="text-sm font-bold">📌 本週工作重點：</strong>
-      <span id="printFocusNoteText" class="text-sm">無特別標註事項</span>
-    </div>
-
-    <!-- Print Announcements -->
-    <div class="mb-8">
-      <h3 class="text-base font-extrabold border-b border-slate-700 pb-1 mb-3">📢 每週公告與執行事項</h3>
-      <table class="w-full text-left border-collapse border border-slate-400 text-xs">
-        <thead>
-          <tr class="bg-slate-100">
-            <th class="border border-slate-400 p-2 w-20">提案組別</th>
-            <th class="border border-slate-400 p-2 w-24">對象/優先</th>
-            <th class="border border-slate-400 p-2">公告標題與內容</th>
-            <th class="border border-slate-400 p-2 w-28">辦理時間與狀態</th>
-          </tr>
-        </thead>
-        <tbody id="printAnnouncementsTbody">
-          <!-- Populated dynamically -->
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Print Proposals -->
-    <div>
-      <h3 class="text-base font-extrabold border-b border-slate-700 pb-1 mb-3">🏛️ 主管會議提案與決議追蹤</h3>
-      <table class="w-full text-left border-collapse border border-slate-400 text-xs">
-        <thead>
-          <tr class="bg-slate-100">
-            <th class="border border-slate-400 p-2 w-20">提案組別</th>
-            <th class="border border-slate-400 p-2">提案案由與說明</th>
-            <th class="border border-slate-400 p-2">主管會議決議內容</th>
-            <th class="border border-slate-400 p-2 w-20">狀態</th>
-          </tr>
-        </thead>
-        <tbody id="printProposalsTbody">
-          <!-- Populated dynamically -->
-        </tbody>
-      </table>
-    </div>
+    </footer>
   </div>
 
-  <!-- ==================== MODALS ==================== -->
 
-  <!-- Modal 1: Add/Edit Announcement (UPDATED AUDIENCE LIST) -->
-  <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh]">
-      <!-- Header -->
-      <div class="bg-slate-900 px-6 py-4 flex items-center justify-between">
-        <h3 id="modalAnnouncementTitle" class="text-lg font-bold text-white flex items-center gap-2">
-          📢 新增公告事項
-        </h3>
-        <button onclick="closeAnnouncementModal()" class="text-slate-400 hover:text-white transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+  <!-- ==================== DEDICATED PRINT AREA (OUTSIDE APP SHELL) ==================== -->
+  <div id="printArea">
+    <!-- Populated dynamically before calling window.print() -->
+  </div>
+
+
+  <!-- ==================== MODAL OVERLAYS ==================== -->
+
+  <!-- 1. ADD / EDIT WEEK MODAL -->
+  <div id="modalAddWeek" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="px-6 py-4 bg-slate-800 text-white flex items-center justify-between">
+        <h3 id="modalWeekTitle" class="font-bold text-base flex items-center gap-2">📅 新增行事週次</h3>
+        <button onclick="closeModal('modalAddWeek')" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
 
-      <!-- Form Body -->
-      <form id="announcementForm" onsubmit="saveAnnouncement(event)" class="p-6 overflow-y-auto space-y-4">
-        <input type="hidden" id="announcementId">
-
-        <!-- Row 1: Proposal Group -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">提案組別</label>
-          <select id="formAnnGroup" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50 font-medium" required>
-            <option value="輔導主任">輔導主任</option>
-            <option value="特教組">特教組</option>
-            <option value="輔導組">輔導組</option>
-            <option value="資註組">資註組</option>
-          </select>
-        </div>
-
-        <!-- Row 2: Title -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">公告標題 <span class="text-red-600">*</span></label>
-          <input type="text" id="formAnnTitle" required placeholder="請輸入簡明公告標題..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
-        </div>
-
-        <!-- Row 3: Target Audience (INCLUDES 行政人員, 主管會議), Priority, Status -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <form id="formWeek" onsubmit="handleSaveWeek(event)" class="p-6 space-y-4 text-xs text-slate-700">
+        <input type="hidden" id="weekFormId">
+        
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">公告對象</label>
-            <select id="formAnnTarget" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50 font-medium">
-              <option value="全校教職員">全校教職員</option>
-              <option value="行政人員">行政人員</option>
-              <option value="主管會議">主管會議</option>
-              <option value="低年級">低年級</option>
-              <option value="中年級">中年級</option>
-              <option value="高年級">高年級</option>
-              <option value="特教教師">特教教師</option>
-              <option value="家長">家長</option>
-              <option value="學生">學生</option>
-            </select>
+            <label class="block font-bold mb-1">學年度 *</label>
+            <input type="number" id="weekAcademicYear" required min="110" max="130" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-semibold">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">優先程度</label>
-            <select id="formAnnPriority" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50 font-medium">
-              <option value="普通">普通</option>
-              <option value="重要">重要</option>
-              <option value="緊急">緊急</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">辦理狀態</label>
-            <select id="formAnnStatus" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50 font-medium">
-              <option value="進行中">進行中</option>
-              <option value="已完成">已完成</option>
-              <option value="延期">延期</option>
-              <option value="取消">取消</option>
+            <label class="block font-bold mb-1">學期 *</label>
+            <select id="weekSemester" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-semibold">
+              <option value="1">第 1 學期</option>
+              <option value="2">第 2 學期</option>
             </select>
           </div>
         </div>
 
-        <!-- Row 4: Event Date & Time -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">活動/執行日期</label>
-            <input type="date" id="formAnnEventDate" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
+            <label class="block font-bold mb-1">週次數字 (如: 1) *</label>
+            <input type="number" id="weekNumber" required min="1" max="30" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-semibold">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">活動/執行時間</label>
-            <input type="text" id="formAnnEventTime" placeholder="例：12:30 - 13:30 或 晨會時間" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
+            <label class="block font-bold mb-1">當週主題 / 焦點</label>
+            <input type="text" id="weekTopic" placeholder="例：敬師週 / 性平宣導週" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
           </div>
         </div>
 
-        <!-- Row 5: Detailed Content -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1">起始日期 (週一) *</label>
+            <input type="date" id="weekStartDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">結束日期 (週日) *</label>
+            <input type="date" id="weekEndDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+          </div>
+        </div>
+
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">詳細內容 <span class="text-red-600">*</span></label>
-          <textarea id="formAnnContent" rows="4" required placeholder="請填寫詳細公告內容、地點或注意事項..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+          <label class="block font-bold mb-1">當週重點備註</label>
+          <textarea id="weekNotes" rows="2" placeholder="備註事項或行事提示..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"></textarea>
         </div>
 
-        <!-- Footer Buttons -->
-        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
-          <button type="button" onclick="closeAnnouncementModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 transition">
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+          <button type="button" onclick="closeModal('modalAddWeek')" class="px-4 py-2 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition">
             取消
           </button>
-          <button type="submit" class="bg-red-700 hover:bg-red-600 text-white font-bold text-xs sm:text-sm px-5 py-2 rounded-lg shadow transition">
-            儲存並同步雲端
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition">
+            儲存週次
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal 2: Add/Edit Proposal -->
-  <div id="proposalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh]">
-      <div class="bg-slate-900 px-6 py-4 flex items-center justify-between">
-        <h3 id="modalProposalTitle" class="text-lg font-bold text-white flex items-center gap-2">
-          🏛️ 新增主管會議提案
-        </h3>
-        <button onclick="closeProposalModal()" class="text-slate-400 hover:text-white transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+
+  <!-- 2. ADD / EDIT ANNOUNCEMENT MODAL -->
+  <div id="modalAddAnnouncement" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="px-6 py-4 bg-indigo-900 text-white flex items-center justify-between">
+        <h3 id="modalAnnouncementTitle" class="font-bold text-base flex items-center gap-2">📢 新增每週處室公告</h3>
+        <button onclick="closeModal('modalAddAnnouncement')" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
 
-      <form id="proposalForm" onsubmit="saveProposal(event)" class="p-6 overflow-y-auto space-y-4">
-        <input type="hidden" id="proposalId">
+      <form id="formAnnouncement" onsubmit="handleSaveAnnouncement(event)" class="p-6 space-y-4 text-xs text-slate-700">
+        <input type="hidden" id="annFormId">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">提案組別</label>
-            <select id="formPropGroup" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50 font-medium" required>
+            <label class="block font-bold mb-1">提案組別 *</label>
+            <select id="annGroup" required class="w-full px-3 py-2 border border-slate-300 rounded-lg font-bold focus:ring-2 focus:ring-indigo-500">
               <option value="輔導主任">輔導主任</option>
               <option value="特教組">特教組</option>
               <option value="輔導組">輔導組</option>
@@ -465,8 +541,99 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">辦理狀態</label>
-            <select id="formPropStatus" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50 font-medium">
+            <label class="block font-bold mb-1">公告對象 *</label>
+            <select id="annTargetAudience" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+              <option value="全校教職員">全校教職員</option>
+              <option value="行政人員">行政人員</option>
+              <option value="主管會議">主管會議</option>
+              <option value="低年級">低年級</option>
+              <option value="中年級">中年級</option>
+              <option value="高年級">高年級</option>
+              <option value="特教教師">特教教師</option>
+              <option value="家長">家長</option>
+              <option value="學生">學生</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">公告標題 *</label>
+          <input type="text" id="annTitle" required placeholder="請輸入明確的公告主題" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-semibold text-sm">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1">活動/執行日期</label>
+            <input type="date" id="annEventDate" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">活動/執行時間</label>
+            <input type="text" id="annEventTime" placeholder="例：08:00 - 08:35 或 第3節" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1">優先程度</label>
+            <select id="annPriority" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+              <option value="普通">🔹 普通</option>
+              <option value="重要">🟠 重要</option>
+              <option value="緊急">🔴 緊急</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1">辦理狀態</label>
+            <select id="annStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+              <option value="進行中">進行中</option>
+              <option value="已完成">已完成</option>
+              <option value="延期">延期</option>
+              <option value="取消">取消</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">詳細內容與說明 *</label>
+          <textarea id="annContent" required rows="4" placeholder="請詳細列出說明、注意事項或相關連結..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-normal"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+          <button type="button" onclick="closeModal('modalAddAnnouncement')" class="px-4 py-2 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition">
+            取消
+          </button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition">
+            儲存公告
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 3. ADD / EDIT PROPOSAL MODAL -->
+  <div id="modalAddProposal" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="px-6 py-4 bg-emerald-900 text-white flex items-center justify-between">
+        <h3 id="modalProposalTitle" class="font-bold text-base flex items-center gap-2">📝 新增主管會議提案</h3>
+        <button onclick="closeModal('modalAddProposal')" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <form id="formProposal" onsubmit="handleSaveProposal(event)" class="p-6 space-y-4 text-xs text-slate-700">
+        <input type="hidden" id="propFormId">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1">提案組別 *</label>
+            <select id="propGroup" required class="w-full px-3 py-2 border border-slate-300 rounded-lg font-bold focus:ring-2 focus:ring-emerald-500">
+              <option value="輔導主任">輔導主任</option>
+              <option value="特教組">特教組</option>
+              <option value="輔導組">輔導組</option>
+              <option value="資註組">資註組</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1">辦理進度</label>
+            <select id="propStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium">
               <option value="研擬中">研擬中</option>
               <option value="主管會議討論中">主管會議討論中</option>
               <option value="報局核備中">報局核備中</option>
@@ -477,25 +644,30 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">提案案由/標題 <span class="text-red-600">*</span></label>
-          <input type="text" id="formPropTitle" required placeholder="請輸入提案案由簡述..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
+          <label class="block font-bold mb-1">提案標題 *</label>
+          <input type="text" id="propTitle" required placeholder="例如：115學年度個別化教育計畫(IEP)檢討會議規劃案" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-semibold text-sm">
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">提案說明與建議辦法 <span class="text-red-600">*</span></label>
-          <textarea id="formPropContent" rows="4" required placeholder="請說明背景原因、預期目標及具體執行建議..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+          <label class="block font-bold mb-1">案由與說明 *</label>
+          <textarea id="propDescription" required rows="3" placeholder="請詳細說明提案背後之原因、背景與需求..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">主管會議決議與指示 (可會後補填)</label>
-          <textarea id="formPropResolution" rows="3" placeholder="填寫校長或主管會議最終討論決議..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-amber-50/50"></textarea>
+          <label class="block font-bold mb-1">擬辦與建議</label>
+          <textarea id="propSuggestion" rows="2" placeholder="請提供本組研擬之建議方案或具體步驟..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"></textarea>
         </div>
 
-        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
-          <button type="button" onclick="closeProposalModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 transition">
+        <div>
+          <label class="block font-bold mb-1 text-emerald-800">主管會議決議事項 (開會完畢填寫)</label>
+          <textarea id="propResolution" rows="3" placeholder="紀錄主管會議中校長或會議主席裁示之決議內容..." class="w-full px-3 py-2 border border-emerald-300 bg-emerald-50/40 rounded-lg focus:ring-2 focus:ring-emerald-500 font-medium"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+          <button type="button" onclick="closeModal('modalAddProposal')" class="px-4 py-2 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition">
             取消
           </button>
-          <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-5 py-2 rounded-lg shadow transition">
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition">
             儲存提案
           </button>
         </div>
@@ -503,190 +675,241 @@
     </div>
   </div>
 
-  <!-- Modal 3: Edit Week Info -->
-  <div id="editWeekModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
-      <div class="bg-slate-900 px-6 py-4 flex items-center justify-between">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          ✏️ 編輯當週行事重點
-        </h3>
-        <button onclick="closeEditWeekModal()" class="text-slate-400 hover:text-white transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+
+  <!-- 4. QUICK RESOLUTION EDIT MODAL -->
+  <div id="modalQuickResolution" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="px-6 py-4 bg-slate-800 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center gap-2">📝 快速登記 / 更新主管會議決議</h3>
+        <button onclick="closeModal('modalQuickResolution')" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
 
-      <form onsubmit="saveWeekEdit(event)" class="p-6 space-y-4">
+      <form id="formQuickResolution" onsubmit="handleSaveQuickResolution(event)" class="p-6 space-y-4 text-xs text-slate-700">
+        <input type="hidden" id="quickPropId">
+        
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">週次名稱</label>
-          <input type="text" id="weekEditName" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">開始日期</label>
-            <input type="date" id="weekEditStartDate" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">結束日期</label>
-            <input type="date" id="weekEditEndDate" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
-          </div>
+          <span class="block text-slate-500 text-[11px]">提案名稱：</span>
+          <p id="quickPropTitleDisplay" class="font-bold text-slate-800 text-sm mt-0.5"></p>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">本週重點提示 / 備註</label>
-          <textarea id="weekEditNote" rows="3" placeholder="例如：辦理親職教育講座、性平宣導週..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"></textarea>
+          <label class="block font-bold mb-1">辦理進度狀態 *</label>
+          <select id="quickPropStatus" required class="w-full px-3 py-2 border border-slate-300 rounded-lg font-bold focus:ring-2 focus:ring-emerald-500">
+            <option value="研擬中">研擬中</option>
+            <option value="主管會議討論中">主管會議討論中</option>
+            <option value="報局核備中">報局核備中</option>
+            <option value="執行中">執行中</option>
+            <option value="已結案">已結案</option>
+          </select>
         </div>
 
-        <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
-          <button type="button" onclick="closeEditWeekModal()" class="px-4 py-2 text-xs font-bold text-slate-600">取消</button>
-          <button type="submit" class="bg-red-700 hover:bg-red-600 text-white font-bold text-xs sm:text-sm px-5 py-2 rounded-lg shadow">儲存設定</button>
+        <div>
+          <label class="block font-bold mb-1 text-slate-800">主管會議決議內容 *</label>
+          <textarea id="quickPropResolution" required rows="4" placeholder="請輸入決議事項或校長裁示..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium text-xs"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+          <button type="button" onclick="closeModal('modalQuickResolution')" class="px-4 py-2 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition">
+            取消
+          </button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition">
+            更新決議
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal 4: Week List Manager -->
-  <div id="weekManagerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[85vh]">
-      <div class="bg-slate-900 px-6 py-4 flex items-center justify-between">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          ⚙️ 學期週次總表管理 (115學年度第1學期)
-        </h3>
-        <button onclick="closeWeekManagerModal()" class="text-slate-400 hover:text-white transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+
+  <!-- 5. WEEK MANAGEMENT TABLE MODAL -->
+  <div id="modalManageWeeks" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-100 flex flex-col max-h-[85vh]">
+      <div class="px-6 py-4 bg-slate-800 text-white flex items-center justify-between flex-shrink-0">
+        <h3 class="font-bold text-base flex items-center gap-2">⚙️ 全校週次總表管理</h3>
+        <button onclick="closeModal('modalManageWeeks')" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-4">
-        <div class="flex items-center justify-between">
-          <p class="text-xs text-slate-500">此處可新增、修改或刪除全學期的每週行事區間。</p>
-          <button onclick="addNewWeekRow()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow transition">
-            + 新增一週
+      <div class="p-6 overflow-y-auto flex-grow space-y-4">
+        <div class="flex justify-between items-center">
+          <p class="text-xs text-slate-500">此處列出系統中所有已建立之週次行事曆，包含未來與過去學期。</p>
+          <button onclick="closeModal('modalManageWeeks'); openModal('modalAddWeek');" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">
+            ＋ 新增週次
           </button>
         </div>
 
-        <div class="border border-slate-200 rounded-lg overflow-hidden">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-100 text-slate-700">
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left text-xs text-slate-700 border-collapse">
+            <thead class="bg-slate-100 font-bold border-b border-slate-200 text-slate-800">
               <tr>
-                <th class="p-2.5 border-b">週次名稱</th>
-                <th class="p-2.5 border-b">日期區間 (起~止)</th>
-                <th class="p-2.5 border-b">本週重點備註</th>
-                <th class="p-2.5 border-b text-center">操作</th>
+                <th class="p-3">學期</th>
+                <th class="p-3">週次</th>
+                <th class="p-3">主題焦點</th>
+                <th class="p-3">起訖日期</th>
+                <th class="p-3 text-right">操作</th>
               </tr>
             </thead>
-            <tbody id="weekManagerTableBody">
-              <!-- Dynamically populated -->
+            <tbody id="weekManagerTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
             </tbody>
           </table>
         </div>
       </div>
 
-      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
-        <button onclick="closeWeekManagerModal()" class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg">關閉</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 5: Line Message Copy Preview -->
-  <div id="lineModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
-      <div class="bg-emerald-700 px-6 py-4 flex items-center justify-between">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          📋 LINE 群組週報廣播訊息
-        </h3>
-        <button onclick="closeLineModal()" class="text-emerald-100 hover:text-white transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="p-6 space-y-3">
-        <p class="text-xs text-slate-500">以下為本週處室公告之簡明格式，點擊下方「複製內容」即可貼至教職員 LINE 群組：</p>
-        <textarea id="lineMessageTextArea" readonly rows="12" class="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 leading-relaxed"></textarea>
-      </div>
-
-      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end gap-3">
-        <button onclick="closeLineModal()" class="px-4 py-2 text-xs font-bold text-slate-600">關閉</button>
-        <button onclick="executeCopyLineText()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm px-5 py-2 rounded-lg shadow">
-          📋 複製文字至剪貼簿
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end flex-shrink-0">
+        <button onclick="closeModal('modalManageWeeks')" class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-lg">
+          關閉
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 6: Safe Custom Alert/Confirm Modal -->
-  <div id="customDialogModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
-      <div class="flex items-start gap-3">
-        <div id="dialogIcon" class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xl shrink-0">
+
+  <!-- 6. LINE BROADCAST COPY MODAL -->
+  <div id="modalLineBroadcast" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 flex flex-col max-h-[85vh]">
+      <div class="px-6 py-4 bg-emerald-800 text-white flex items-center justify-between flex-shrink-0">
+        <h3 class="font-bold text-base flex items-center gap-2">💬 LINE 處室每週訊息文字格式</h3>
+        <button onclick="closeModal('modalLineBroadcast')" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <div class="p-6 overflow-y-auto flex-grow space-y-3">
+        <p class="text-xs text-slate-600">已自動整合當週所有處室公告與主管會議決議，可直接複製並貼上至學校群組：</p>
+        <textarea id="lineBroadcastTextarea" readonly rows="14" class="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-300 rounded-xl focus:ring-0 text-slate-800 selection:bg-emerald-200"></textarea>
+      </div>
+
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between flex-shrink-0">
+        <span id="copySuccessNotice" class="text-xs font-bold text-emerald-600 hidden">✓ 已成功複製到剪貼簿！</span>
+        <div class="flex gap-2 ml-auto">
+          <button onclick="closeModal('modalLineBroadcast')" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium hover:bg-slate-100">
+            關閉
+          </button>
+          <button onclick="executeCopyLineText()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center gap-1.5">
+            📋 複製文字
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 7. PRINT PREVIEW MODAL -->
+  <div id="modalPrintPreview" class="modal-overlay fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-100 flex flex-col h-[90vh]">
+      <div class="px-6 py-3.5 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+        <h3 class="font-bold text-base flex items-center gap-2">🖨️ 每週處室週報 (A4 列印預覽)</h3>
+        <button onclick="closeModal('modalPrintPreview')" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <!-- Filter bar inside print preview -->
+      <div class="px-6 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-slate-700">列印範圍：</span>
+          <label class="inline-flex items-center gap-1.5 cursor-pointer">
+            <input type="radio" name="printScope" value="ALL" checked onchange="updatePrintPreviewContent()" class="text-indigo-600">
+            <span>全處室彙整版</span>
+          </label>
+          <label class="inline-flex items-center gap-1.5 cursor-pointer ml-3">
+            <input type="radio" name="printScope" value="FILTERED" onchange="updatePrintPreviewContent()" class="text-indigo-600">
+            <span>僅列印當前篩選組別 (<span id="printScopeGroupName"></span>)</span>
+          </label>
+        </div>
+        <span class="text-slate-500">標準 A4 直式版面</span>
+      </div>
+
+      <!-- Preview Document Display Container -->
+      <div class="p-6 overflow-y-auto flex-grow bg-slate-200/70 flex justify-center">
+        <div id="onScreenPrintPreview" class="bg-white p-8 shadow-md border border-slate-300 w-full max-w-[210mm] min-h-[297mm] text-slate-900">
+          <!-- Dynamically populated report html -->
+        </div>
+      </div>
+
+      <!-- Print Action Footer -->
+      <div class="px-6 py-4 bg-white border-t border-slate-200 flex items-center justify-between flex-shrink-0">
+        <p class="text-xs text-slate-500">提示：系統會直接呼叫瀏覽器標準列印視窗，您亦可選擇「另存為 PDF」。</p>
+        <div class="flex items-center gap-3">
+          <button onclick="closeModal('modalPrintPreview')" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium hover:bg-slate-50">
+            取消
+          </button>
+          <button onclick="triggerActualPrint()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center gap-2">
+            🖨️ 確認列印 / 另存 PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 8. FIREBASE DIAGNOSTICS & CONNECTION MODAL -->
+  <div id="modalFirebaseInfo" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+      <div class="px-6 py-4 bg-slate-800 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center gap-2">☁️ 雲端資料庫連線狀態</h3>
+        <button onclick="closeModal('modalFirebaseInfo')" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs text-slate-700">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <span class="block text-slate-500 text-[11px]">目標資料庫 URL:</span>
+          <code class="font-mono text-slate-800 text-xs font-bold block mt-1 break-all">
+            https://rixin-guidance-default-rtdb.asia-southeast1.firebasedatabase.app/
+          </code>
+        </div>
+
+        <div>
+          <span class="block text-slate-500 text-[11px] mb-1">目前連線狀態：</span>
+          <div id="diagStatusDetail" class="p-3 rounded-lg font-bold">
+            <!-- Dynamic -->
+          </div>
+        </div>
+
+        <p class="text-slate-500 leading-relaxed">
+          系統支援多人即時同步。若無網路或 Firebase 阻擋，系統將自動開啟「離線單機模式」並暫存於本機瀏覽器。
+        </p>
+
+        <div class="pt-2 flex justify-end">
+          <button onclick="closeModal('modalFirebaseInfo')" class="px-4 py-2 bg-slate-800 text-white font-bold rounded-lg">
+            確定
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 9. CUSTOM CONFIRMATION MODAL (Replaces window.confirm) -->
+  <div id="modalConfirm" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-100">
+      <div class="p-6 text-center space-y-3">
+        <div id="confirmIcon" class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto text-xl font-bold">
           ⚠️
         </div>
-        <div>
-          <h4 id="dialogTitle" class="text-base font-bold text-slate-900">提示標題</h4>
-          <p id="dialogMessage" class="text-xs text-slate-600 mt-1 leading-relaxed">提示內容訊息...</p>
-        </div>
+        <h3 id="confirmTitle" class="font-bold text-base text-slate-800">確認執行此動作？</h3>
+        <p id="confirmMessage" class="text-xs text-slate-600 leading-relaxed">刪除後將無法復原，確定要繼續嗎？</p>
       </div>
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100" id="dialogButtons">
-        <!-- Action buttons inserted dynamically -->
-      </div>
-    </div>
-  </div>
 
-  <!-- Modal 7: Diagnostic / Connection Modal -->
-  <div id="diagnosticModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-      <div class="bg-slate-900 px-6 py-4 flex items-center justify-between">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          🌐 雲端連線狀態與診斷
-        </h3>
-        <button onclick="closeDiagnosticModal()" class="text-slate-400 hover:text-white">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+        <button id="btnConfirmCancel" onclick="closeConfirmModal(false)" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-white transition">
+          取消
+        </button>
+        <button id="btnConfirmOk" onclick="closeConfirmModal(true)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+          確定刪除
         </button>
       </div>
-
-      <div class="p-6 space-y-4 text-xs">
-        <div class="p-3 rounded-lg bg-slate-100 border border-slate-200 space-y-1">
-          <div class="flex justify-between">
-            <span class="text-slate-500 font-bold">目前連線模式：</span>
-            <span id="diagMode" class="font-bold text-emerald-600">🟢 Firebase 雲端即時同步</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-500">專案 ID：</span>
-            <span class="font-mono text-slate-800">rixin-guidance</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-500">伺服器節點：</span>
-            <span class="font-mono text-slate-800">asia-southeast1</span>
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <h4 class="font-bold text-slate-700">說明與防護：</h4>
-          <p class="text-slate-600 leading-relaxed">
-            系統會自動即時同步 Firebase 資料庫。若遇到網路離線或金鑰限制，將會自動切換為本機 LocalStorage 離線單機模式，資料不會遺失。
-          </p>
-        </div>
-      </div>
-
-      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
-        <button onclick="closeDiagnosticModal()" class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg">確定</button>
-      </div>
     </div>
   </div>
 
-  <!-- Toast Alert Floating Box -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <span id="toastIcon">✅</span>
-    <span id="toastText">訊息發送成功</span>
-  </div>
 
-  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
-  <!-- Firebase Modular ES SDK -->
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+
+  <!-- ==================== JAVASCRIPT & FIREBASE CORE MODULE ==================== -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    // Firebase Modular SDK CDN
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getDatabase, ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
-    // 1. Firebase Config Directly Embedded
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCAKemAj10HG7t1R-tZpw_9WN9mmfEhsZw",
       authDomain: "rixin-guidance.firebaseapp.com",
@@ -698,960 +921,1409 @@
       measurementId: "G-CZ9QPWDS7E"
     };
 
-    // Global State
-    let app, db;
-    let isConnected = false;
-    let activeWeekId = "w13";
-    let activeGroup = "ALL";
-    let activeTab = "announcements";
-
-    // Data Structures
-    let systemData = {
-      weeks: [],
-      announcements: [],
-      proposals: []
+    // State Variables
+    let appState = {
+      weeks: [],          // Pure user data (No auto-generated sample data!)
+      announcements: [],  // Pure user announcements
+      proposals: [],      // Pure user proposals
+      currentWeekId: null,
+      activeGroupFilter: 'ALL',
+      isOnline: false,
+      dbPath: '/rixin_guidance_data', // Default save path if database is completely empty
+      errorDetails: null
     };
 
-    // Default seed weeks (115學年度第1學期)
-    const defaultWeeks = [
-      { id: "w1", name: "第 1 週", startDate: "2026-08-31", endDate: "2026-09-06", note: "始業輔導與各組計畫擬定" },
-      { id: "w2", name: "第 2 週", startDate: "2026-09-07", endDate: "2026-09-13", note: "特教推行委員會與班親會準備" },
-      { id: "w3", name: "第 3 週", startDate: "2026-09-14", endDate: "2026-09-20", note: "學校日班親會辦理" },
-      { id: "w4", name: "第 4 週", startDate: "2026-09-21", endDate: "2026-09-27", note: "防災演練與個別化教育計畫(IEP)會議" },
-      { id: "w5", name: "第 5 週", startDate: "2026-09-28", endDate: "2026-10-04", note: "敬師週感恩活動" },
-      { id: "w6", name: "第 6 週", startDate: "2026-10-05", endDate: "2026-10-11", note: "輔導志工授證與個案轉介調查" },
-      { id: "w7", name: "第 7 週", startDate: "2026-10-12", endDate: "2026-10-18", note: "心理衛生與憂鬱防治宣導" },
-      { id: "w8", name: "第 8 週", startDate: "2026-10-19", endDate: "2026-10-25", note: "期中定期評量籌備" },
-      { id: "w9", name: "第 9 週", startDate: "2026-10-26", endDate: "2026-11-01", note: "期中定期評量週" },
-      { id: "w10", name: "第 10 週", startDate: "2026-11-02", endDate: "2026-11-08", note: "評量後個案關懷與學習扶助檢討" },
-      { id: "w11", name: "第 11 週", startDate: "2026-11-09", endDate: "2026-11-15", note: "家庭教育與親職講座" },
-      { id: "w12", name: "第 12 週", startDate: "2026-11-16", endDate: "2026-11-22", note: "特教評量資優鑑定初選" },
-      { id: "w13", name: "第 13 週", startDate: "2026-11-23", endDate: "2026-11-29", note: "性平教育與生命教育宣導週" },
-      { id: "w14", name: "第 14 週", startDate: "2026-11-30", endDate: "2026-12-06", note: "人權教育與生涯發展檔案整理" },
-      { id: "w15", name: "第 15 週", startDate: "2026-12-07", endDate: "2026-12-13", note: "輔導個案督導會議" },
-      { id: "w16", name: "第 16 週", startDate: "2026-12-14", endDate: "2026-12-20", note: "歲末感恩活動籌備" },
-      { id: "w17", name: "第 17 週", startDate: "2026-12-21", endDate: "2026-12-27", note: "歲末感恩關懷週" },
-      { id: "w18", name: "第 18 週", startDate: "2026-12-28", endDate: "2027-01-03", note: "期末定期評量複習準備" },
-      { id: "w19", name: "第 19 週", startDate: "2027-01-04", endDate: "2027-01-10", note: "期末定期評量週" },
-      { id: "w20", name: "第 20 週", startDate: "2027-01-11", endDate: "2027-01-17", note: "特教IEP期末檢討會與成果彙整" },
-      { id: "w21", name: "第 21 週", startDate: "2027-01-18", endDate: "2027-01-24", note: "休業式與寒假輔導準備" }
-    ];
+    let dbRefInstance = null;
+    let pendingConfirmResolver = null;
 
-    // Initial seed sample announcements & proposals
-    const sampleAnnouncements = [
-      {
-        id: "ann-101",
-        weekId: "w13",
-        group: "輔導主任",
-        title: "討論家長會長交接與處室發展會議",
-        target: "行政人員",
-        priority: "重要",
-        status: "進行中",
-        eventDate: "2026-11-25",
-        eventTime: "10:00 - 11:30",
-        content: "請輔導室全體組長出席，研討本學期家長會熱心教育奉獻交接細節及後續活動經費申請。",
-        updatedAt: Date.now()
-      },
-      {
-        id: "ann-102",
-        weekId: "w13",
-        group: "輔導組",
-        title: "辦理生命教育專題講座「珍愛生命、擁抱希望」",
-        target: "全校教職員",
-        priority: "緊急",
-        status: "進行中",
-        eventDate: "2026-11-26",
-        eventTime: "晨會時間 (08:00 - 08:35)",
-        content: "地點於演藝廳，邀請外聘心理師進行身心健康與自殺防治宣導，請全校同仁準時出席。",
-        updatedAt: Date.now()
-      },
-      {
-        id: "ann-103",
-        weekId: "w13",
-        group: "特教組",
-        title: "115學年度身心障礙學生個別化教育計畫(IEP)檢討提案",
-        target: "主管會議",
-        priority: "重要",
-        status: "進行中",
-        eventDate: "2026-11-24",
-        eventTime: "主管會議時段",
-        content: "將於主管會議中提報特教班資源分配與跨領域學習輔具支援方案，請主任參閱提案資料。",
-        updatedAt: Date.now()
+    // Helper: Local Today Date String (Strict YYYY-MM-DD in local time)
+    function getLocalTodayStr() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // Helper: Normalize Date String (e.g., '2026/9/1' or '2026-9-1' -> '2026-09-01')
+    function normalizeDateStr(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.replace(/\//g, '-').split('-');
+      if (parts.length !== 3) return dateStr;
+      const y = parts[0];
+      const m = String(parseInt(parts[1], 10)).padStart(2, '0');
+      const d = String(parseInt(parts[2], 10)).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    // Helper: Escape HTML
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Helper: Toast Notifications
+    window.showToast = function(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-white flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 ${
+        type === 'success' ? 'bg-emerald-600' :
+        type === 'warning' ? 'bg-amber-600' :
+        type === 'error' ? 'bg-red-600' : 'bg-slate-800'
+      }`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    };
+
+    // Helper: Custom Confirm Dialog Promise
+    window.customConfirm = function(title, message, isDangerous = true) {
+      return new Promise((resolve) => {
+        pendingConfirmResolver = resolve;
+        document.getElementById('confirmTitle').innerText = title;
+        document.getElementById('confirmMessage').innerText = message;
+        
+        const iconEl = document.getElementById('confirmIcon');
+        const okBtn = document.getElementById('btnConfirmOk');
+
+        if (isDangerous) {
+          iconEl.className = 'w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto text-xl font-bold';
+          iconEl.innerText = '⚠️';
+          okBtn.className = 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm transition';
+          okBtn.innerText = '確定刪除';
+        } else {
+          iconEl.className = 'w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto text-xl font-bold';
+          iconEl.innerText = '❓';
+          okBtn.className = 'px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition';
+          okBtn.innerText = '確定執行';
+        }
+
+        openModal('modalConfirm');
+      });
+    };
+
+    window.closeConfirmModal = function(result) {
+      closeModal('modalConfirm');
+      if (pendingConfirmResolver) {
+        pendingConfirmResolver(result);
+        pendingConfirmResolver = null;
       }
-    ];
+    };
 
-    const sampleProposals = [
-      {
-        id: "prop-201",
-        weekId: "w13",
-        group: "特教組",
-        title: "擬採購特教班新式感統輔具與個別化輔導設備案",
-        status: "主管會議討論中",
-        content: "為提升特教學生專注力與感覺統合訓練品質，擬向局端申請特教補助經費新臺幣五萬元採購專業輔具。",
-        resolution: "原則同意，請特教組補充明確品項清冊後陳報教育局申請補助。",
-        updatedAt: Date.now()
-      }
-    ];
 
-    // ==================== INITIALIZATION ====================
-    window.addEventListener("DOMContentLoaded", () => {
+    // ==================== INITIALIZATION & FIREBASE SETUP ====================
+    window.addEventListener('DOMContentLoaded', () => {
       initFirebase();
     });
 
-    function initFirebase() {
+    async function initFirebase() {
+      const badge = document.getElementById('syncStatusBadge');
+      
       try {
-        app = initializeApp(firebaseConfig);
-        db = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // Inspect Database Structure dynamic strategy
+        const rootRef = ref(db, '/');
+        
+        onValue(rootRef, (snapshot) => {
+          appState.isOnline = true;
+          badge.className = "text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 cursor-pointer hover:bg-emerald-500/30 transition-all";
+          badge.innerHTML = "🟢 雲端連線中（多人即時協作）";
 
-        // Monitor connection status
-        const connectedRef = ref(db, ".info/connected");
-        onValue(connectedRef, (snap) => {
-          if (snap.val() === true) {
-            isConnected = true;
-            updateConnectionBadge(true);
-          } else {
-            isConnected = false;
-            updateConnectionBadge(false);
-          }
-        });
-
-        // Listen for data from RTDB root node "rixin_guidance_system"
-        const dataRef = ref(db, "rixin_guidance_system");
-        onValue(dataRef, (snapshot) => {
           const val = snapshot.val();
-          if (val && val.weeks && val.weeks.length > 0) {
-            systemData = val;
+          
+          if (!val) {
+            // Root is completely empty -> set path to default, keep arrays empty
+            appState.dbPath = '/rixin_guidance_data';
+            appState.weeks = [];
+            appState.announcements = [];
+            appState.proposals = [];
+          } else if (val.weeks || val.announcements || val.proposals) {
+            // Data stored directly at root '/'
+            appState.dbPath = '/';
+            appState.weeks = Array.isArray(val.weeks) ? val.weeks : (val.weeks ? Object.values(val.weeks) : []);
+            appState.announcements = Array.isArray(val.announcements) ? val.announcements : (val.announcements ? Object.values(val.announcements) : []);
+            appState.proposals = Array.isArray(val.proposals) ? val.proposals : (val.proposals ? Object.values(val.proposals) : []);
           } else {
-            // First time initialization in Firebase
-            systemData = {
-              weeks: defaultWeeks,
-              announcements: sampleAnnouncements,
-              proposals: sampleProposals
-            };
-            syncToFirebase();
+            // Check if there is a single child wrapper node (e.g. rixin_guidance_data or rixinGuidance)
+            const keys = Object.keys(val);
+            let foundChildWrapper = false;
+
+            for (const key of keys) {
+              if (val[key] && (val[key].weeks || val[key].announcements || val[key].proposals)) {
+                appState.dbPath = `/${key}`;
+                appState.weeks = Array.isArray(val[key].weeks) ? val[key].weeks : (val[key].weeks ? Object.values(val[key].weeks) : []);
+                appState.announcements = Array.isArray(val[key].announcements) ? val[key].announcements : (val[key].announcements ? Object.values(val[key].announcements) : []);
+                appState.proposals = Array.isArray(val[key].proposals) ? val[key].proposals : (val[key].proposals ? Object.values(val[key].proposals) : []);
+                foundChildWrapper = true;
+                break;
+              }
+            }
+
+            if (!foundChildWrapper) {
+              appState.dbPath = '/rixin_guidance_data';
+              appState.weeks = [];
+              appState.announcements = [];
+              appState.proposals = [];
+            }
           }
-          saveToLocalStorage();
-          autoSelectWeekByDate();
-          renderAll();
+
+          dbRefInstance = ref(db, appState.dbPath);
+
+          // Select week logic if not selected yet
+          syncWeekSelectionAfterDataLoad();
+          renderUI();
         }, (error) => {
-          console.warn("Firebase Read Warning (Fallback to LocalStorage):", error);
-          loadFromLocalStorage();
+          console.warn('Firebase error:', error);
+          enableOfflineMode(error.message);
         });
 
       } catch (err) {
-        console.error("Firebase init failed:", err);
-        loadFromLocalStorage();
+        console.warn('Firebase init exception:', err);
+        enableOfflineMode(err.message);
       }
     }
 
-    function updateConnectionBadge(online) {
-      const dot = document.getElementById("connectionDot");
-      const text = document.getElementById("connectionText");
-      const diagMode = document.getElementById("diagMode");
+    function enableOfflineMode(errMsg) {
+      appState.isOnline = false;
+      appState.errorDetails = errMsg;
 
-      if (online) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-        text.innerText = "🟢 雲端連線中（多人即時協作）";
-        text.className = "text-emerald-400 font-bold";
-        if (diagMode) diagMode.innerHTML = '<span class="text-emerald-600 font-bold">🟢 Firebase 雲端即時同步</span>';
-      } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
-        text.innerText = "🟠 離線單機模式 (LocalStorage)";
-        text.className = "text-amber-300 font-medium";
-        if (diagMode) diagMode.innerHTML = '<span class="text-amber-600 font-bold">🟠 離線單機備份模式</span>';
-      }
-    }
+      const badge = document.getElementById('syncStatusBadge');
+      badge.className = "text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30 cursor-pointer hover:bg-amber-500/30 transition-all";
+      badge.innerHTML = "🟠 離線單機模式";
 
-    function saveToLocalStorage() {
-      localStorage.setItem("rixin_guidance_v2_data", JSON.stringify(systemData));
-    }
-
-    function loadFromLocalStorage() {
-      const local = localStorage.getItem("rixin_guidance_v2_data");
-      if (local) {
+      // Load from localStorage if available (NO sample data!)
+      const cached = localStorage.getItem('rixin_guidance_local_cache');
+      if (cached) {
         try {
-          systemData = JSON.parse(local);
+          const parsed = JSON.parse(cached);
+          appState.weeks = parsed.weeks || [];
+          appState.announcements = parsed.announcements || [];
+          appState.proposals = parsed.proposals || [];
         } catch (e) {
-          systemData = { weeks: defaultWeeks, announcements: sampleAnnouncements, proposals: sampleProposals };
+          appState.weeks = [];
+          appState.announcements = [];
+          appState.proposals = [];
         }
       } else {
-        systemData = { weeks: defaultWeeks, announcements: sampleAnnouncements, proposals: sampleProposals };
+        appState.weeks = [];
+        appState.announcements = [];
+        appState.proposals = [];
       }
-      autoSelectWeekByDate();
-      renderAll();
+
+      syncWeekSelectionAfterDataLoad();
+      renderUI();
     }
 
-    function syncToFirebase() {
-      saveToLocalStorage();
-      if (db) {
-        set(ref(db, "rixin_guidance_system"), systemData).catch(err => {
-          console.warn("RTDB write error:", err);
-        });
+    // Save State to Firebase / LocalStorage
+    async function saveData() {
+      // Offline fallback cache
+      localStorage.setItem('rixin_guidance_local_cache', JSON.stringify({
+        weeks: appState.weeks,
+        announcements: appState.announcements,
+        proposals: appState.proposals
+      }));
+
+      if (appState.isOnline && dbRefInstance) {
+        try {
+          await set(dbRefInstance, {
+            weeks: appState.weeks,
+            announcements: appState.announcements,
+            proposals: appState.proposals
+          });
+        } catch (err) {
+          console.error('Failed to sync write to Firebase:', err);
+          showToast('⚠️ 雲端同步失敗，已儲存於本機暫存', 'warning');
+        }
       }
     }
 
-    // Auto-detect calendar date to select matching week
-    function autoSelectWeekByDate() {
-      if (!systemData.weeks || systemData.weeks.length === 0) return;
-      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-      
-      const found = systemData.weeks.find(w => today >= w.startDate && today <= w.endDate);
-      if (found) {
-        activeWeekId = found.id;
+    // Week Selection Logic on Load
+    function syncWeekSelectionAfterDataLoad() {
+      if (appState.weeks.length === 0) {
+        appState.currentWeekId = null;
+        return;
+      }
+
+      // Check if currentWeekId is still valid
+      if (appState.currentWeekId && appState.weeks.some(w => w.id === appState.currentWeekId)) {
+        return;
+      }
+
+      // Try finding week covering today
+      const todayStr = getLocalTodayStr();
+      const currentCalendarWeek = appState.weeks.find(w => {
+        const start = normalizeDateStr(w.startDate);
+        const end = normalizeDateStr(w.endDate);
+        return start <= todayStr && todayStr <= end;
+      });
+
+      if (currentCalendarWeek) {
+        appState.currentWeekId = currentCalendarWeek.id;
       } else {
-        // Default to w13 if current date is out of sample scope
-        activeWeekId = systemData.weeks[12]?.id || systemData.weeks[0]?.id || "w13";
+        // Fallback: Pick latest week by startDate
+        const sorted = [...appState.weeks].sort((a, b) => normalizeDateStr(b.startDate).localeCompare(normalizeDateStr(a.startDate)));
+        appState.currentWeekId = sorted[0].id;
       }
     }
 
-    // ==================== RENDERING FUNCTIONS ====================
-    function renderAll() {
-      renderWeekSelector();
-      renderCurrentWeekHeader();
+
+    // ==================== CRITICAL FEATURE: JUMP TO CURRENT WEEK ====================
+    window.jumpToCurrentWeek = function() {
+      const todayStr = getLocalTodayStr();
+
+      if (appState.weeks.length === 0) {
+        showToast(`目前資料庫尚無週次紀錄，請先「＋ 新增週次」`, 'warning');
+        openAddWeekModalPrefilledWithToday();
+        return;
+      }
+
+      // Search for matching calendar week
+      const matchingWeek = appState.weeks.find(w => {
+        const start = normalizeDateStr(w.startDate);
+        const end = normalizeDateStr(w.endDate);
+        return start <= todayStr && todayStr <= end;
+      });
+
+      if (matchingWeek) {
+        const isAlreadyCurrent = appState.currentWeekId === matchingWeek.id;
+        appState.currentWeekId = matchingWeek.id;
+        renderUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (isAlreadyCurrent) {
+          showToast(`📍 目前已在本週：第 ${matchingWeek.weekNumber} 週 (${matchingWeek.topic || '一般行事'})`, 'info');
+        } else {
+          showToast(`📍 已成功切換至本週：第 ${matchingWeek.weekNumber} 週`, 'success');
+        }
+      } else {
+        showToast(`📍 資料庫中找不到包含今日 (${todayStr}) 的週次，可點擊新增本週`, 'warning');
+        openAddWeekModalPrefilledWithToday();
+      }
+    };
+
+    function openAddWeekModalPrefilledWithToday() {
+      // Calculate Monday and Sunday of current week for pre-fill
+      const now = new Date();
+      const day = now.getDay();
+      const diffToMon = (day === 0 ? -6 : 1) - day;
+      
+      const mon = new Date(now);
+      mon.setDate(now.getDate() + diffToMon);
+      
+      const sun = new Date(mon);
+      sun.setDate(mon.getDate() + 6);
+
+      const formatYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      openModal('modalAddWeek');
+      document.getElementById('weekAcademicYear').value = 115;
+      document.getElementById('weekSemester').value = 1;
+      document.getElementById('weekNumber').value = (appState.weeks.length + 1) || 1;
+      document.getElementById('weekTopic').value = '';
+      document.getElementById('weekStartDate').value = formatYMD(mon);
+      document.getElementById('weekEndDate').value = formatYMD(sun);
+      document.getElementById('weekNotes').value = '';
+      document.getElementById('weekFormId').value = '';
+    }
+
+
+    // ==================== RENDERING CORE UI ====================
+    window.renderUI = function() {
+      const todayStr = getLocalTodayStr();
+      const emptyContainer = document.getElementById('emptyDatabaseContainer');
+      const mainGrid = document.getElementById('mainContentGrid');
+      const selectWeek = document.getElementById('selectWeek');
+      const detailsBanner = document.getElementById('currentWeekDetailsBanner');
+
+      // 1. If database has 0 weeks
+      if (appState.weeks.length === 0) {
+        emptyContainer.classList.remove('hidden');
+        mainGrid.classList.add('hidden');
+        selectWeek.innerHTML = `<option value="">(無週次紀錄)</option>`;
+        selectWeek.disabled = true;
+        detailsBanner.innerHTML = `<span class="text-slate-400 font-normal">請先點擊新增週次</span>`;
+        return;
+      }
+
+      emptyContainer.classList.add('hidden');
+      mainGrid.classList.remove('hidden');
+      selectWeek.disabled = false;
+
+      // 2. Sort weeks by AcademicYear desc, Semester desc, weekNumber asc
+      const sortedWeeks = [...appState.weeks].sort((a, b) => {
+        if (a.academicYear !== b.academicYear) return b.academicYear - a.academicYear;
+        if (a.semester !== b.semester) return b.semester - a.semester;
+        return a.weekNumber - b.weekNumber;
+      });
+
+      // Render Dropdown options
+      selectWeek.innerHTML = sortedWeeks.map(w => {
+        const start = normalizeDateStr(w.startDate);
+        const end = normalizeDateStr(w.endDate);
+        const isCurrentCalendar = (start <= todayStr && todayStr <= end);
+        const currentTag = isCurrentCalendar ? ' [本週]' : '';
+        const topicText = w.topic ? ` - ${w.topic}` : '';
+        return `<option value="${w.id}" ${w.id === appState.currentWeekId ? 'selected' : ''}>
+          ${w.academicYear}學年度第${w.semester}學期 第${w.weekNumber}週${topicText}${currentTag} (${start} ~ ${end})
+        </option>`;
+      }).join('');
+
+      // Find current selected week object
+      const currentWeekObj = appState.weeks.find(w => w.id === appState.currentWeekId) || sortedWeeks[0];
+      if (currentWeekObj) appState.currentWeekId = currentWeekObj.id;
+
+      // Render Week Details Banner
+      if (currentWeekObj) {
+        const wStart = normalizeDateStr(currentWeekObj.startDate);
+        const wEnd = normalizeDateStr(currentWeekObj.endDate);
+        const isTodayWeek = (wStart <= todayStr && todayStr <= wEnd);
+
+        detailsBanner.innerHTML = `
+          <span class="font-bold text-slate-800 text-sm">第 ${currentWeekObj.weekNumber} 週</span>
+          ${isTodayWeek ? `<span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">📍 當前本週</span>` : ''}
+          <span class="text-slate-500 font-mono">${wStart} ~ ${wEnd}</span>
+          ${currentWeekObj.topic ? `<span class="bg-slate-200 text-slate-800 font-semibold px-2 py-0.5 rounded">${escapeHtml(currentWeekObj.topic)}</span>` : ''}
+          ${currentWeekObj.notes ? `<span class="text-slate-500 italic max-w-xs truncate" title="${escapeHtml(currentWeekObj.notes)}">💬 ${escapeHtml(currentWeekObj.notes)}</span>` : ''}
+          <div class="ml-auto flex items-center gap-1.5">
+            <button onclick="openEditWeekModal('${currentWeekObj.id}')" class="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded text-[11px] font-medium transition" title="編輯週次資訊">
+              ✏️ 編輯
+            </button>
+            <button onclick="handleDeleteWeek('${currentWeekObj.id}')" class="px-2 py-1 bg-white hover:bg-red-50 text-red-600 border border-slate-300 rounded text-[11px] font-medium transition" title="刪除此週次">
+              🗑️ 刪除
+            </button>
+          </div>
+        `;
+      }
+
+      // Render Announcements & Proposals
       renderAnnouncements();
       renderProposals();
-      renderPrintView();
-    }
+      updateGroupFilterTabsUI();
+    };
 
-    function renderWeekSelector() {
-      const selector = document.getElementById("weekSelector");
-      if (!selector) return;
 
-      const today = new Date().toISOString().split("T")[0];
-
-      selector.innerHTML = systemData.weeks.map(w => {
-        const isCurrentCalendarWeek = (today >= w.startDate && today <= w.endDate);
-        const tag = isCurrentCalendarWeek ? " [本週]" : "";
-        const selected = w.id === activeWeekId ? "selected" : "";
-        return `<option value="${w.id}" ${selected}>${w.name} (${w.startDate.slice(5)}) ${tag}</option>`;
-      }).join("");
-    }
-
-    function renderCurrentWeekHeader() {
-      const week = systemData.weeks.find(w => w.id === activeWeekId) || systemData.weeks[0];
-      if (!week) return;
-
-      document.getElementById("currentWeekBadge").innerText = week.name;
-      document.getElementById("currentDateRange").innerText = `📅 ${week.startDate} ～ ${week.endDate}`;
+    // ==================== RENDER ANNOUNCEMENTS ====================
+    window.renderAnnouncements = function() {
+      const container = document.getElementById('announcementList');
+      const statCount = document.getElementById('statAnnouncementCount');
       
-      const noteEl = document.getElementById("currentWeekNote");
-      if (week.note) {
-        noteEl.innerText = `📌 本週重點：${week.note}`;
-        noteEl.classList.remove("hidden");
-      } else {
-        noteEl.classList.add("hidden");
+      if (!appState.currentWeekId) {
+        container.innerHTML = `<p class="text-center py-8 text-slate-400 text-xs">請先選擇週次</p>`;
+        statCount.innerText = '0';
+        return;
       }
-    }
 
-    // Filter & Render Announcements Tab
-    function renderAnnouncements() {
-      const listEl = document.getElementById("announcementsList");
-      if (!listEl) return;
+      // Filter by Week
+      let list = appState.announcements.filter(a => a.weekId === appState.currentWeekId);
 
-      const searchKey = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
-      const targetVal = document.getElementById("targetFilter")?.value || "ALL";
-      const priorityVal = document.getElementById("priorityFilter")?.value || "ALL";
-      const statusVal = document.getElementById("statusFilter")?.value || "ALL";
+      // Filter by Group
+      if (appState.activeGroupFilter !== 'ALL') {
+        list = list.filter(a => a.group === appState.activeGroupFilter);
+      }
 
-      // Filter logic
-      let items = (systemData.announcements || []).filter(item => {
-        if (item.weekId !== activeWeekId) return false;
-        if (activeGroup !== "ALL" && item.group !== activeGroup) return false;
-        if (targetVal !== "ALL" && item.target !== targetVal) return false;
-        if (priorityVal !== "ALL" && item.priority !== priorityVal) return false;
-        if (statusVal !== "ALL" && item.status !== statusVal) return false;
-        if (searchKey) {
-          const titleMatch = (item.title || "").toLowerCase().includes(searchKey);
-          const contentMatch = (item.content || "").toLowerCase().includes(searchKey);
-          if (!titleMatch && !contentMatch) return false;
-        }
-        return true;
-      });
+      // Filter by Target Audience
+      const audFilter = document.getElementById('filterAnnouncementAudience').value;
+      if (audFilter !== 'ALL') {
+        list = list.filter(a => a.targetAudience === audFilter);
+      }
 
-      // Count badge update
-      document.getElementById("announcementBadgeCount").innerText = items.length;
+      // Filter by Priority
+      const prioFilter = document.getElementById('filterAnnouncementPriority').value;
+      if (prioFilter !== 'ALL') {
+        list = list.filter(a => a.priority === prioFilter);
+      }
 
-      if (items.length === 0) {
-        listEl.innerHTML = `
-          <div class="col-span-full bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-400 space-y-2">
-            <span class="text-3xl">📭</span>
-            <p class="text-sm font-medium">當前週次與篩選條件下無公告事項</p>
-            <button onclick="openAddAnnouncementModal()" class="text-xs text-red-700 font-bold hover:underline">+ 點此新增公告</button>
+      // Filter by Status
+      const stFilter = document.getElementById('filterAnnouncementStatus').value;
+      if (stFilter !== 'ALL') {
+        list = list.filter(a => a.status === stFilter);
+      }
+
+      // Search Query
+      const query = document.getElementById('searchAnnouncementQuery').value.trim().toLowerCase();
+      if (query) {
+        list = list.filter(a => 
+          (a.title && a.title.toLowerCase().includes(query)) ||
+          (a.content && a.content.toLowerCase().includes(query)) ||
+          (a.targetAudience && a.targetAudience.toLowerCase().includes(query))
+        );
+      }
+
+      statCount.innerText = list.length;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 px-4 text-slate-400 text-xs">
+            <span class="text-3xl block mb-2">📭</span>
+            當前條件下尚無公告事項，點擊「＋ 新增公告事項」即可建立。
           </div>
         `;
         return;
       }
 
-      listEl.innerHTML = items.map(item => {
-        // Group Color Pill
-        let groupBg = "bg-slate-700 text-white";
-        if (item.group === "輔導主任") groupBg = "bg-indigo-700 text-white";
-        if (item.group === "特教組") groupBg = "bg-purple-700 text-white";
-        if (item.group === "輔導組") groupBg = "bg-emerald-700 text-white";
-        if (item.group === "資註組") groupBg = "bg-cyan-700 text-white";
+      // Sort by Priority (緊急 -> 重要 -> 普通)
+      const priorityOrder = { '緊急': 1, '重要': 2, '普通': 3 };
+      list.sort((a, b) => (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3));
 
-        // Priority Badge
-        let priorityStyle = "bg-slate-100 text-slate-700 border-slate-200";
-        if (item.priority === "緊急") priorityStyle = "bg-red-50 text-red-700 border-red-200 font-black animate-pulse";
-        if (item.priority === "重要") priorityStyle = "bg-orange-50 text-orange-700 border-orange-200 font-bold";
+      container.innerHTML = list.map((item, index) => {
+        const groupColorMap = {
+          '輔導主任': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+          '特教組': 'bg-purple-100 text-purple-800 border-purple-200',
+          '輔導組': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+          '資註組': 'bg-cyan-100 text-cyan-800 border-cyan-200'
+        };
+        const groupBadge = groupColorMap[item.group] || 'bg-slate-100 text-slate-800';
 
-        // Status Style
-        let statusStyle = "bg-blue-50 text-blue-700 border-blue-200";
-        if (item.status === "已完成") statusStyle = "bg-emerald-50 text-emerald-700 border-emerald-200";
-        if (item.status === "延期") statusStyle = "bg-amber-50 text-amber-700 border-amber-200";
-        if (item.status === "取消") statusStyle = "bg-slate-100 text-slate-400 line-through border-slate-200";
+        const priorityBadgeMap = {
+          '緊急': 'bg-red-600 text-white font-bold',
+          '重要': 'bg-amber-500 text-white font-bold',
+          '普通': 'bg-slate-100 text-slate-600 font-medium'
+        };
+        const prioBadge = priorityBadgeMap[item.priority] || 'bg-slate-100 text-slate-600';
 
-        // Highlight for new options
-        const isSpecialTarget = (item.target === "行政人員" || item.target === "主管會議");
-        const targetBadgeClass = isSpecialTarget 
-          ? "bg-red-50 text-red-700 border-red-300 font-extrabold" 
-          : "bg-slate-100 text-slate-700 border-slate-200";
+        const statusBadgeMap = {
+          '進行中': 'bg-blue-50 text-blue-700 border-blue-200',
+          '已完成': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+          '延期': 'bg-amber-50 text-amber-700 border-amber-200',
+          '取消': 'bg-slate-100 text-slate-500 border-slate-200'
+        };
+        const statusBadge = statusBadgeMap[item.status] || 'bg-slate-100 text-slate-700';
 
         return `
-          <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-3 relative group">
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="text-xs font-black px-2.5 py-0.5 rounded-md ${groupBg}">${item.group}</span>
-                  <span class="text-xs border px-2 py-0.5 rounded-md ${targetBadgeClass}">🎯 ${item.target || "全校教職員"}</span>
-                  <span class="text-xs border px-2 py-0.5 rounded-md ${priorityStyle}">${item.priority || "普通"}</span>
+          <div class="py-4 hover:bg-slate-50/80 transition px-2 rounded-xl flex flex-col sm:flex-row items-start justify-between gap-3 group">
+            <div class="space-y-1.5 flex-grow">
+              <div class="flex items-center flex-wrap gap-2">
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded border ${groupBadge}">${escapeHtml(item.group)}</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">對象：${escapeHtml(item.targetAudience || '全校教職員')}</span>
+                <span class="text-[11px] px-2 py-0.5 rounded ${prioBadge}">${escapeHtml(item.priority || '普通')}</span>
+                <span class="text-[11px] px-2 py-0.5 rounded border ${statusBadge}">${escapeHtml(item.status || '進行中')}</span>
+              </div>
+
+              <h4 class="text-sm font-bold text-slate-800 leading-snug pt-0.5">
+                ${index + 1}. ${escapeHtml(item.title)}
+              </h4>
+
+              ${(item.eventDate || item.eventTime) ? `
+                <div class="text-xs text-indigo-700 font-medium flex items-center gap-2 pt-0.5">
+                  ${item.eventDate ? `<span>📅 ${escapeHtml(item.eventDate)}</span>` : ''}
+                  ${item.eventTime ? `<span>⏰ ${escapeHtml(item.eventTime)}</span>` : ''}
                 </div>
-                <span class="text-xs border px-2.5 py-0.5 rounded-full font-bold ${statusStyle}">${item.status}</span>
-              </div>
+              ` : ''}
 
-              <h4 class="text-base font-bold text-slate-900 leading-snug">${escapeHTML(item.title)}</h4>
-              <p class="text-xs text-slate-600 mt-2 whitespace-pre-line leading-relaxed">${escapeHTML(item.content)}</p>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-              <div class="flex items-center gap-3 flex-wrap font-medium">
-                ${item.eventDate ? `<span>📅 ${item.eventDate}</span>` : ''}
-                ${item.eventTime ? `<span>⏰ ${escapeHTML(item.eventTime)}</span>` : ''}
-              </div>
-              <div class="flex items-center gap-2">
-                <button onclick="editAnnouncement('${item.id}')" class="text-slate-600 hover:text-red-700 font-bold px-2 py-1 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 transition">
-                  ✏️ 編輯
-                </button>
-                <button onclick="deleteAnnouncementConfirm('${item.id}')" class="text-slate-400 hover:text-red-600 font-bold px-2 py-1 transition">
-                  🗑️
-                </button>
+              <div class="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed pt-1 bg-slate-50/50 p-2.5 rounded-lg border border-slate-100">
+                ${escapeHtml(item.content)}
               </div>
             </div>
-          </div>
-        `;
-      }).join("");
-    }
 
-    // Filter & Render Proposals Tab
-    function renderProposals() {
-      const listEl = document.getElementById("proposalsList");
-      if (!listEl) return;
-
-      let items = (systemData.proposals || []).filter(item => {
-        if (item.weekId !== activeWeekId) return false;
-        if (activeGroup !== "ALL" && item.group !== activeGroup) return false;
-        return true;
-      });
-
-      document.getElementById("proposalBadgeCount").innerText = items.length;
-
-      if (items.length === 0) {
-        listEl.innerHTML = `
-          <div class="bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-400 space-y-2">
-            <span class="text-3xl">🏛️</span>
-            <p class="text-sm font-medium">本週尚無主管會議提案記錄</p>
-            <button onclick="openAddProposalModal()" class="text-xs text-slate-800 font-bold hover:underline">+ 新增提案</button>
-          </div>
-        `;
-        return;
-      }
-
-      listEl.innerHTML = items.map(item => {
-        let statusBadge = "bg-amber-100 text-amber-800 border-amber-300";
-        if (item.status === "已結案") statusBadge = "bg-emerald-100 text-emerald-800 border-emerald-300";
-        if (item.status === "執行中") statusBadge = "bg-blue-100 text-blue-800 border-blue-300";
-
-        return `
-          <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-4">
-            <div class="flex items-start justify-between gap-3 flex-wrap">
-              <div class="flex items-center gap-2">
-                <span class="bg-slate-900 text-white text-xs font-black px-2.5 py-1 rounded-md">${item.group}</span>
-                <h4 class="text-base font-bold text-slate-900">${escapeHTML(item.title)}</h4>
-              </div>
-              <span class="text-xs font-extrabold px-3 py-1 rounded-full border ${statusBadge}">${item.status}</span>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-              <span class="text-xs font-bold text-slate-500 block mb-1">💡 提案說明與建議辦法：</span>
-              <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed">${escapeHTML(item.content)}</p>
-            </div>
-
-            <div class="bg-amber-50/70 p-3 rounded-lg border border-amber-200">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-extrabold text-amber-900 flex items-center gap-1">📌 會議決議與指示：</span>
-                <button onclick="editProposalResolution('${item.id}')" class="text-[11px] font-bold text-amber-800 hover:text-amber-950 underline">
-                  ✏️ 登記/更新決議
-                </button>
-              </div>
-              <p class="text-xs text-amber-900 font-medium whitespace-pre-line leading-relaxed">${item.resolution ? escapeHTML(item.resolution) : '（尚無登記決議紀錄）'}</p>
-            </div>
-
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-              <button onclick="editProposal('${item.id}')" class="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-md transition">
-                ✏️ 編輯提案
+            <!-- Card Actions -->
+            <div class="flex items-center gap-1.5 self-end sm:self-start flex-shrink-0 pt-1">
+              <button onclick="openEditAnnouncementModal('${item.id}')" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs transition font-medium">
+                ✏️ 編輯
               </button>
-              <button onclick="deleteProposalConfirm('${item.id}')" class="text-xs font-bold text-red-600 hover:bg-red-50 px-2 py-1.5 rounded-md transition">
+              <button onclick="handleDeleteAnnouncement('${item.id}')" class="px-2.5 py-1 bg-white hover:bg-red-50 text-red-600 border border-slate-300 rounded-lg text-xs transition font-medium">
                 🗑️ 刪除
               </button>
             </div>
           </div>
         `;
-      }).join("");
-    }
+      }).join('');
+    };
 
-    // Render A4 Print View
-    function renderPrintView() {
-      const week = systemData.weeks.find(w => w.id === activeWeekId) || systemData.weeks[0];
-      if (!week) return;
 
-      document.getElementById("printWeekHeader").innerText = `115學年度第1學期 ${week.name} 處室每週公告與主管會議決議表`;
-      document.getElementById("printDateHeader").innerText = `列印區間：${week.startDate} ～ ${week.endDate} | 印製時間：${new Date().toLocaleDateString()}`;
+    // ==================== RENDER PROPOSALS ====================
+    window.renderProposals = function() {
+      const container = document.getElementById('proposalList');
+      const statCount = document.getElementById('statProposalCount');
+
+      if (!appState.currentWeekId) {
+        container.innerHTML = `<p class="text-center py-8 text-slate-400 text-xs">請先選擇週次</p>`;
+        statCount.innerText = '0';
+        return;
+      }
+
+      // Filter by Week
+      let list = appState.proposals.filter(p => p.weekId === appState.currentWeekId);
+
+      // Filter by Group
+      if (appState.activeGroupFilter !== 'ALL') {
+        list = list.filter(p => p.group === appState.activeGroupFilter);
+      }
+
+      statCount.innerText = list.length;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 px-4 text-slate-400 text-xs">
+            <span class="text-3xl block mb-2">📋</span>
+            當前條件下尚無主管會議提案，點擊「＋ 新增提案與決議」即可建立。
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map((item, index) => {
+        const groupColorMap = {
+          '輔導主任': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+          '特教組': 'bg-purple-100 text-purple-800 border-purple-200',
+          '輔導組': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+          '資註組': 'bg-cyan-100 text-cyan-800 border-cyan-200'
+        };
+        const groupBadge = groupColorMap[item.group] || 'bg-slate-100 text-slate-800';
+
+        const statusBadgeMap = {
+          '研擬中': 'bg-slate-100 text-slate-700',
+          '主管會議討論中': 'bg-amber-100 text-amber-800 font-bold',
+          '報局核備中': 'bg-purple-100 text-purple-800',
+          '執行中': 'bg-blue-100 text-blue-800 font-bold',
+          '已結案': 'bg-emerald-100 text-emerald-800 font-bold'
+        };
+        const statusBadge = statusBadgeMap[item.status] || 'bg-slate-100 text-slate-700';
+
+        return `
+          <div class="py-4 hover:bg-slate-50/80 transition px-2 rounded-xl flex flex-col sm:flex-row items-start justify-between gap-3 group">
+            <div class="space-y-2 flex-grow">
+              <div class="flex items-center flex-wrap gap-2">
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded border ${groupBadge}">${escapeHtml(item.group)}</span>
+                <span class="text-[11px] px-2 py-0.5 rounded ${statusBadge}">狀態：${escapeHtml(item.status || '研擬中')}</span>
+              </div>
+
+              <h4 class="text-sm font-bold text-slate-900 leading-snug">
+                ${index + 1}. ${escapeHtml(item.title)}
+              </h4>
+
+              <!-- Description & Suggestion -->
+              <div class="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                <div>
+                  <strong class="text-slate-900 font-semibold">【案由說明】</strong>
+                  <p class="whitespace-pre-wrap mt-0.5 text-slate-700">${escapeHtml(item.description)}</p>
+                </div>
+                ${item.suggestion ? `
+                  <div class="pt-1.5 border-t border-slate-200/60">
+                    <strong class="text-slate-900 font-semibold">【擬辦建議】</strong>
+                    <p class="whitespace-pre-wrap mt-0.5 text-slate-600">${escapeHtml(item.suggestion)}</p>
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Resolution Block -->
+              <div class="bg-emerald-50/80 border border-emerald-200 p-3 rounded-xl text-xs space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-emerald-900 flex items-center gap-1">
+                    🏛️ 主管會議決議事項：
+                  </span>
+                  <button onclick="openQuickResolutionModal('${item.id}')" class="text-emerald-700 hover:text-emerald-900 font-bold underline text-[11px]">
+                    📝 登記/更新決議
+                  </button>
+                </div>
+                <p class="whitespace-pre-wrap text-emerald-950 font-medium ${item.resolution ? '' : 'italic text-emerald-700/70'}">
+                  ${item.resolution ? escapeHtml(item.resolution) : '(尚無紀錄，會議後點擊上方按鈕登記決議)'}
+                </p>
+              </div>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="flex items-center gap-1.5 self-end sm:self-start flex-shrink-0 pt-1">
+              <button onclick="openEditProposalModal('${item.id}')" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs transition font-medium">
+                ✏️ 編輯
+              </button>
+              <button onclick="handleDeleteProposal('${item.id}')" class="px-2.5 py-1 bg-white hover:bg-red-50 text-red-600 border border-slate-300 rounded-lg text-xs transition font-medium">
+                🗑️ 刪除
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+
+    // ==================== GROUP FILTER SWITCHING ====================
+    window.setGroupFilter = function(groupName) {
+      appState.activeGroupFilter = groupName;
+      updateGroupFilterTabsUI();
+      renderAnnouncements();
+      renderProposals();
+    };
+
+    function updateGroupFilterTabsUI() {
+      const groupNames = ['ALL', '輔導主任', '特教組', '輔導組', '資註組'];
       
-      const printNoteText = document.getElementById("printFocusNoteText");
-      if (week.note) {
-        printNoteText.innerText = week.note;
-      } else {
-        printNoteText.innerText = "無特別標註事項";
-      }
-
-      // Announcements Table
-      const annBody = document.getElementById("printAnnouncementsTbody");
-      const currentAnns = (systemData.announcements || []).filter(a => a.weekId === activeWeekId);
-      if (currentAnns.length === 0) {
-        annBody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400">本週尚無任何公告事項記錄</td></tr>`;
-      } else {
-        annBody.innerHTML = currentAnns.map(a => `
-          <tr>
-            <td class="border border-slate-400 p-2 font-bold">${a.group}</td>
-            <td class="border border-slate-400 p-2">
-              <div>${a.target || "全校"}</div>
-              <div class="text-[10px] text-slate-500">${a.priority || "普通"}</div>
-            </td>
-            <td class="border border-slate-400 p-2">
-              <div class="font-bold">${escapeHTML(a.title)}</div>
-              <div class="text-[11px] text-slate-600 mt-1">${escapeHTML(a.content)}</div>
-            </td>
-            <td class="border border-slate-400 p-2">
-              <div>${a.eventDate || ''}</div>
-              <div class="text-[10px]">${a.eventTime || ''}</div>
-              <div class="font-bold text-red-800 mt-1">${a.status}</div>
-            </td>
-          </tr>
-        `).join("");
-      }
-
-      // Proposals Table
-      const propBody = document.getElementById("printProposalsTbody");
-      const currentProps = (systemData.proposals || []).filter(p => p.weekId === activeWeekId);
-      if (currentProps.length === 0) {
-        propBody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400">本週尚無主管會議提案記錄</td></tr>`;
-      } else {
-        propBody.innerHTML = currentProps.map(p => `
-          <tr>
-            <td class="border border-slate-400 p-2 font-bold">${p.group}</td>
-            <td class="border border-slate-400 p-2">
-              <div class="font-bold">${escapeHTML(p.title)}</div>
-              <div class="text-[11px] text-slate-600 mt-1">${escapeHTML(p.content)}</div>
-            </td>
-            <td class="border border-slate-400 p-2">
-              <div class="text-[11px] font-medium">${p.resolution ? escapeHTML(p.resolution) : '（尚無決議）'}</div>
-            </td>
-            <td class="border border-slate-400 p-2 font-bold">${p.status}</td>
-          </tr>
-        `).join("");
-      }
-    }
-
-    // ==================== INTERACTION HANDLERS ====================
-    window.switchWeek = function(weekId) {
-      activeWeekId = weekId;
-      renderAll();
-    };
-
-    window.goToCurrentWeek = function() {
-      autoSelectWeekByDate();
-      renderAll();
-      showToast("📍 已切換至今天所在週次");
-    };
-
-    window.filterGroup = function(groupName) {
-      activeGroup = groupName;
-      document.querySelectorAll(".group-btn").forEach(btn => {
-        if (btn.getAttribute("data-group") === groupName) {
-          btn.className = "group-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-900 text-white shadow-sm";
+      groupNames.forEach(g => {
+        const btn = document.getElementById(`filter-${g}`);
+        if (!btn) return;
+        if (g === appState.activeGroupFilter) {
+          btn.className = "group-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-slate-800 text-white shadow-sm ring-2 ring-slate-400";
         } else {
-          btn.className = "group-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200";
+          btn.className = "group-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 bg-white text-slate-700 hover:bg-slate-100 border border-slate-200";
         }
       });
-      renderAnnouncements();
-      renderProposals();
-    };
 
-    window.switchMainTab = function(tab) {
-      activeTab = tab;
-      const btnAnn = document.getElementById("tabBtnAnnouncements");
-      const btnProp = document.getElementById("tabBtnProposals");
-      const secAnn = document.getElementById("tabAnnouncements");
-      const secProp = document.getElementById("tabProposals");
-
-      if (tab === "announcements") {
-        btnAnn.className = "px-4 py-1.5 rounded-md text-xs font-extrabold transition bg-white text-slate-900 shadow-sm flex items-center gap-1.5";
-        btnProp.className = "px-4 py-1.5 rounded-md text-xs font-extrabold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5";
-        secAnn.classList.remove("hidden");
-        secProp.classList.add("hidden");
-      } else {
-        btnProp.className = "px-4 py-1.5 rounded-md text-xs font-extrabold transition bg-white text-slate-900 shadow-sm flex items-center gap-1.5";
-        btnAnn.className = "px-4 py-1.5 rounded-md text-xs font-extrabold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5";
-        secProp.classList.remove("hidden");
-        secAnn.classList.add("hidden");
-      }
-    };
-
-    // ==================== ANNOUNCEMENT MODAL & CRUD ====================
-    window.openAddAnnouncementModal = function() {
-      document.getElementById("announcementForm").reset();
-      document.getElementById("announcementId").value = "";
-      document.getElementById("modalAnnouncementTitle").innerText = "📢 新增公告事項";
-      document.getElementById("announcementModal").classList.remove("hidden");
-    };
-
-    window.closeAnnouncementModal = function() {
-      document.getElementById("announcementModal").classList.add("hidden");
-    };
-
-    window.editAnnouncement = function(id) {
-      const item = (systemData.announcements || []).find(a => a.id === id);
-      if (!item) return;
-
-      document.getElementById("announcementId").value = item.id;
-      document.getElementById("formAnnGroup").value = item.group;
-      document.getElementById("formAnnTitle").value = item.title;
-      document.getElementById("formAnnTarget").value = item.target || "全校教職員";
-      document.getElementById("formAnnPriority").value = item.priority || "普通";
-      document.getElementById("formAnnStatus").value = item.status || "進行中";
-      document.getElementById("formAnnEventDate").value = item.eventDate || "";
-      document.getElementById("formAnnEventTime").value = item.eventTime || "";
-      document.getElementById("formAnnContent").value = item.content || "";
-
-      document.getElementById("modalAnnouncementTitle").innerText = "✏️ 編輯公告事項";
-      document.getElementById("announcementModal").classList.remove("hidden");
-    };
-
-    window.saveAnnouncement = function(e) {
-      e.preventDefault();
-      const id = document.getElementById("announcementId").value;
-      const group = document.getElementById("formAnnGroup").value;
-      const title = document.getElementById("formAnnTitle").value.trim();
-      const target = document.getElementById("formAnnTarget").value;
-      const priority = document.getElementById("formAnnPriority").value;
-      const status = document.getElementById("formAnnStatus").value;
-      const eventDate = document.getElementById("formAnnEventDate").value;
-      const eventTime = document.getElementById("formAnnEventTime").value.trim();
-      const content = document.getElementById("formAnnContent").value.trim();
-
-      if (!title || !content) {
-        showToast("⚠️ 請填寫標題與詳細內容", "warning");
-        return;
-      }
-
-      if (id) {
-        // Update existing
-        const index = systemData.announcements.findIndex(a => a.id === id);
-        if (index !== -1) {
-          systemData.announcements[index] = {
-            ...systemData.announcements[index],
-            group, title, target, priority, status, eventDate, eventTime, content,
-            updatedAt: Date.now()
-          };
-        }
-      } else {
-        // Create new
-        const newAnn = {
-          id: "ann-" + Date.now(),
-          weekId: activeWeekId,
-          group, title, target, priority, status, eventDate, eventTime, content,
-          updatedAt: Date.now()
-        };
-        if (!systemData.announcements) systemData.announcements = [];
-        systemData.announcements.unshift(newAnn);
-      }
-
-      syncToFirebase();
-      closeAnnouncementModal();
-      renderAnnouncements();
-      renderPrintView();
-      showToast("✅ 已成功儲存公告並同步雲端！");
-    };
-
-    window.deleteAnnouncementConfirm = function(id) {
-      openCustomDialog({
-        title: "確定刪除此筆公告？",
-        message: "刪除後雲端將同步移除此公告，無法復原。",
-        confirmText: "確認刪除",
-        confirmClass: "bg-red-600 hover:bg-red-700 text-white",
-        onConfirm: () => {
-          systemData.announcements = systemData.announcements.filter(a => a.id !== id);
-          syncToFirebase();
-          renderAnnouncements();
-          renderPrintView();
-          showToast("🗑️ 公告已刪除");
-        }
-      });
-    };
-
-    // ==================== PROPOSAL MODAL & CRUD ====================
-    window.openAddProposalModal = function() {
-      document.getElementById("proposalForm").reset();
-      document.getElementById("proposalId").value = "";
-      document.getElementById("modalProposalTitle").innerText = "🏛️ 新增主管會議提案";
-      document.getElementById("proposalModal").classList.remove("hidden");
-    };
-
-    window.closeProposalModal = function() {
-      document.getElementById("proposalModal").classList.add("hidden");
-    };
-
-    window.editProposal = function(id) {
-      const item = (systemData.proposals || []).find(p => p.id === id);
-      if (!item) return;
-
-      document.getElementById("proposalId").value = item.id;
-      document.getElementById("formPropGroup").value = item.group;
-      document.getElementById("formPropStatus").value = item.status || "研擬中";
-      document.getElementById("formPropTitle").value = item.title;
-      document.getElementById("formPropContent").value = item.content;
-      document.getElementById("formPropResolution").value = item.resolution || "";
-
-      document.getElementById("modalProposalTitle").innerText = "✏️ 編輯主管會議提案";
-      document.getElementById("proposalModal").classList.remove("hidden");
-    };
-
-    window.editProposalResolution = function(id) {
-      editProposal(id);
-      document.getElementById("formPropResolution").focus();
-    };
-
-    window.saveProposal = function(e) {
-      e.preventDefault();
-      const id = document.getElementById("proposalId").value;
-      const group = document.getElementById("formPropGroup").value;
-      const status = document.getElementById("formPropStatus").value;
-      const title = document.getElementById("formPropTitle").value.trim();
-      const content = document.getElementById("formPropContent").value.trim();
-      const resolution = document.getElementById("formPropResolution").value.trim();
-
-      if (!title || !content) {
-        showToast("⚠️ 請填寫提案案由與說明內容", "warning");
-        return;
-      }
-
-      if (id) {
-        const index = systemData.proposals.findIndex(p => p.id === id);
-        if (index !== -1) {
-          systemData.proposals[index] = {
-            ...systemData.proposals[index],
-            group, status, title, content, resolution,
-            updatedAt: Date.now()
-          };
-        }
-      } else {
-        const newProp = {
-          id: "prop-" + Date.now(),
-          weekId: activeWeekId,
-          group, status, title, content, resolution,
-          updatedAt: Date.now()
-        };
-        if (!systemData.proposals) systemData.proposals = [];
-        systemData.proposals.unshift(newProp);
-      }
-
-      syncToFirebase();
-      closeProposalModal();
-      renderProposals();
-      renderPrintView();
-      showToast("✅ 已成功儲存主管會議提案！");
-    };
-
-    window.deleteProposalConfirm = function(id) {
-      openCustomDialog({
-        title: "確定刪除此提案？",
-        message: "這將會永久移除該筆主管會議提案與決議紀錄。",
-        confirmText: "確定刪除",
-        confirmClass: "bg-red-600 hover:bg-red-700 text-white",
-        onConfirm: () => {
-          systemData.proposals = systemData.proposals.filter(p => p.id !== id);
-          syncToFirebase();
-          renderProposals();
-          renderPrintView();
-          showToast("🗑️ 提案紀錄已刪除");
-        }
-      });
-    };
-
-    // ==================== WEEK EDIT & MANAGER ====================
-    window.openEditWeekModal = function() {
-      const week = systemData.weeks.find(w => w.id === activeWeekId);
-      if (!week) return;
-
-      document.getElementById("weekEditName").value = week.name;
-      document.getElementById("weekEditStartDate").value = week.startDate;
-      document.getElementById("weekEditEndDate").value = week.endDate;
-      document.getElementById("weekEditNote").value = week.note || "";
-
-      document.getElementById("editWeekModal").classList.remove("hidden");
-    };
-
-    window.closeEditWeekModal = function() {
-      document.getElementById("editWeekModal").classList.add("hidden");
-    };
-
-    window.saveWeekEdit = function(e) {
-      e.preventDefault();
-      const weekIndex = systemData.weeks.findIndex(w => w.id === activeWeekId);
-      if (weekIndex === -1) return;
-
-      systemData.weeks[weekIndex].name = document.getElementById("weekEditName").value.trim();
-      systemData.weeks[weekIndex].startDate = document.getElementById("weekEditStartDate").value;
-      systemData.weeks[weekIndex].endDate = document.getElementById("weekEditEndDate").value;
-      systemData.weeks[weekIndex].note = document.getElementById("weekEditNote").value.trim();
-
-      syncToFirebase();
-      closeEditWeekModal();
-      renderAll();
-      showToast("✅ 當週行事重點已更新");
-    };
-
-    window.openWeekManagerModal = function() {
-      renderWeekManagerTable();
-      document.getElementById("weekManagerModal").classList.remove("hidden");
-    };
-
-    window.closeWeekManagerModal = function() {
-      document.getElementById("weekManagerModal").classList.add("hidden");
-    };
-
-    function renderWeekManagerTable() {
-      const tbody = document.getElementById("weekManagerTableBody");
-      tbody.innerHTML = systemData.weeks.map(w => `
-        <tr class="border-b hover:bg-slate-50">
-          <td class="p-2 border-r font-bold text-slate-800">${w.name}</td>
-          <td class="p-2 border-r text-slate-600">${w.startDate} ~ ${w.endDate}</td>
-          <td class="p-2 border-r text-slate-500 max-w-xs truncate">${w.note || '-'}</td>
-          <td class="p-2 text-center">
-            <button onclick="deleteWeekConfirm('${w.id}')" class="text-red-600 font-bold hover:underline">刪除</button>
-          </td>
-        </tr>
-      `).join("");
+      const labelText = appState.activeGroupFilter === 'ALL' ? '全處室彙整' : `僅檢視：${appState.activeGroupFilter}`;
+      document.getElementById('badgeFilteredGroupAnnouncements').innerText = labelText;
+      document.getElementById('badgeFilteredGroupProposals').innerText = labelText;
     }
 
-    window.addNewWeekRow = function() {
-      const lastWeek = systemData.weeks[systemData.weeks.length - 1];
-      let newNum = systemData.weeks.length + 1;
-      let newId = "w" + Date.now();
-      
-      let nextStart = "2027-01-25";
-      let nextEnd = "2027-01-31";
 
-      if (lastWeek && lastWeek.endDate) {
-        const lastDate = new Date(lastWeek.endDate);
-        lastDate.setDate(lastDate.getDate() + 1);
-        nextStart = lastDate.toISOString().split("T")[0];
-        lastDate.setDate(lastDate.getDate() + 6);
-        nextEnd = lastDate.toISOString().split("T")[0];
-      }
-
-      systemData.weeks.push({
-        id: newId,
-        name: `第 ${newNum} 週`,
-        startDate: nextStart,
-        endDate: nextEnd,
-        note: ""
-      });
-
-      syncToFirebase();
-      renderWeekManagerTable();
-      renderWeekSelector();
-      showToast("➕ 已擴充新增週次");
+    // ==================== WEEK HANDLERS ====================
+    window.handleWeekChange = function(weekId) {
+      appState.currentWeekId = weekId;
+      renderUI();
     };
 
-    window.deleteWeekConfirm = function(weekId) {
-      if (systemData.weeks.length <= 1) {
-        showToast("⚠️ 請至少保留一週紀錄", "warning");
+    window.navigateWeek = function(direction) {
+      if (appState.weeks.length === 0) return;
+      const sorted = [...appState.weeks].sort((a, b) => {
+        if (a.academicYear !== b.academicYear) return a.academicYear - b.academicYear;
+        if (a.semester !== b.semester) return a.semester - b.semester;
+        return a.weekNumber - b.weekNumber;
+      });
+
+      const currentIndex = sorted.findIndex(w => w.id === appState.currentWeekId);
+      if (currentIndex === -1) return;
+
+      const newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < sorted.length) {
+        appState.currentWeekId = sorted[newIndex].id;
+        renderUI();
+      } else {
+        showToast(direction > 0 ? '已是最後一週' : '已是第一週', 'info');
+      }
+    };
+
+    window.handleSaveWeek = async function(event) {
+      event.preventDefault();
+      const id = document.getElementById('weekFormId').value || 'week_' + Date.now();
+      const academicYear = parseInt(document.getElementById('weekAcademicYear').value, 10);
+      const semester = parseInt(document.getElementById('weekSemester').value, 10);
+      const weekNumber = parseInt(document.getElementById('weekNumber').value, 10);
+      const topic = document.getElementById('weekTopic').value.trim();
+      const startDate = document.getElementById('weekStartDate').value;
+      const endDate = document.getElementById('weekEndDate').value;
+      const notes = document.getElementById('weekNotes').value.trim();
+
+      const existingIndex = appState.weeks.findIndex(w => w.id === id);
+      const weekData = { id, academicYear, semester, weekNumber, topic, startDate, endDate, notes };
+
+      if (existingIndex >= 0) {
+        appState.weeks[existingIndex] = weekData;
+        showToast(`已成功更新 第 ${weekNumber} 週行事`, 'success');
+      } else {
+        appState.weeks.push(weekData);
+        appState.currentWeekId = id;
+        showToast(`已成功新增 第 ${weekNumber} 週行事`, 'success');
+      }
+
+      await saveData();
+      closeModal('modalAddWeek');
+      renderUI();
+    };
+
+    window.openEditWeekModal = function(weekId) {
+      const w = appState.weeks.find(item => item.id === weekId);
+      if (!w) return;
+
+      document.getElementById('modalWeekTitle').innerText = '✏️ 編輯行事週次';
+      document.getElementById('weekFormId').value = w.id;
+      document.getElementById('weekAcademicYear').value = w.academicYear;
+      document.getElementById('weekSemester').value = w.semester;
+      document.getElementById('weekNumber').value = w.weekNumber;
+      document.getElementById('weekTopic').value = w.topic || '';
+      document.getElementById('weekStartDate').value = w.startDate;
+      document.getElementById('weekEndDate').value = w.endDate;
+      document.getElementById('weekNotes').value = w.notes || '';
+
+      openModal('modalAddWeek');
+    };
+
+    window.handleDeleteWeek = async function(weekId) {
+      const w = appState.weeks.find(item => item.id === weekId);
+      if (!w) return;
+
+      const confirmed = await customConfirm(
+        `確認刪除「第 ${w.weekNumber} 週」？`,
+        `刪除該週次時，屬於該週的處室公告與主管會議提案亦會同步移除。`
+      );
+
+      if (confirmed) {
+        appState.weeks = appState.weeks.filter(item => item.id !== weekId);
+        appState.announcements = appState.announcements.filter(a => a.weekId !== weekId);
+        appState.proposals = appState.proposals.filter(p => p.weekId !== weekId);
+
+        if (appState.currentWeekId === weekId) {
+          appState.currentWeekId = appState.weeks.length > 0 ? appState.weeks[0].id : null;
+        }
+
+        await saveData();
+        renderUI();
+        renderWeekManagerTable();
+        showToast('已刪除週次與關聯資料', 'info');
+      }
+    };
+
+
+    // ==================== ANNOUNCEMENT HANDLERS ====================
+    window.handleSaveAnnouncement = async function(event) {
+      event.preventDefault();
+      if (!appState.currentWeekId) {
+        showToast('請先建立或選擇週次', 'error');
         return;
       }
-      openCustomDialog({
-        title: "刪除週次確認",
-        message: "刪除該週將會連同該週的公告與提案一併清理，確定嗎？",
-        confirmText: "確認刪除",
-        confirmClass: "bg-red-600 text-white",
-        onConfirm: () => {
-          systemData.weeks = systemData.weeks.filter(w => w.id !== weekId);
-          systemData.announcements = systemData.announcements.filter(a => a.weekId !== weekId);
-          systemData.proposals = systemData.proposals.filter(p => p.weekId !== weekId);
-          
-          if (activeWeekId === weekId) {
-            activeWeekId = systemData.weeks[0].id;
-          }
 
-          syncToFirebase();
-          renderWeekManagerTable();
-          renderAll();
-          showToast("🗑️ 週次已移除");
-        }
-      });
+      const id = document.getElementById('annFormId').value || 'ann_' + Date.now();
+      const group = document.getElementById('annGroup').value;
+      const targetAudience = document.getElementById('annTargetAudience').value;
+      const title = document.getElementById('annTitle').value.trim();
+      const eventDate = document.getElementById('annEventDate').value;
+      const eventTime = document.getElementById('annEventTime').value.trim();
+      const priority = document.getElementById('annPriority').value;
+      const status = document.getElementById('annStatus').value;
+      const content = document.getElementById('annContent').value.trim();
+
+      const existingIndex = appState.announcements.findIndex(a => a.id === id);
+      const data = {
+        id,
+        weekId: appState.currentWeekId,
+        group,
+        targetAudience,
+        title,
+        eventDate,
+        eventTime,
+        priority,
+        status,
+        content,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (existingIndex >= 0) {
+        appState.announcements[existingIndex] = data;
+        showToast('已更新公告事項', 'success');
+      } else {
+        appState.announcements.push(data);
+        showToast('已新增公告事項', 'success');
+      }
+
+      await saveData();
+      closeModal('modalAddAnnouncement');
+      renderAnnouncements();
     };
 
-    // ==================== LINE MESSAGE GENERATOR ====================
-    window.copyLineMessage = function() {
-      const week = systemData.weeks.find(w => w.id === activeWeekId) || systemData.weeks[0];
-      const anns = (systemData.announcements || []).filter(a => a.weekId === activeWeekId);
+    window.openEditAnnouncementModal = function(annId) {
+      const a = appState.announcements.find(item => item.id === annId);
+      if (!a) return;
 
-      let text = `【臺北市日新國小 輔導室每週公告】\n`;
-      text += `📌 ${week.name} (${week.startDate} ~ ${week.endDate})\n`;
-      if (week.note) text += `💡 本週重點：${week.note}\n`;
+      document.getElementById('modalAnnouncementTitle').innerText = '✏️ 編輯處室公告';
+      document.getElementById('annFormId').value = a.id;
+      document.getElementById('annGroup').value = a.group || '輔導組';
+      document.getElementById('annTargetAudience').value = a.targetAudience || '全校教職員';
+      document.getElementById('annTitle').value = a.title || '';
+      document.getElementById('annEventDate').value = a.eventDate || '';
+      document.getElementById('annEventTime').value = a.eventTime || '';
+      document.getElementById('annPriority').value = a.priority || '普通';
+      document.getElementById('annStatus').value = a.status || '進行中';
+      document.getElementById('annContent').value = a.content || '';
+
+      openModal('modalAddAnnouncement');
+    };
+
+    window.handleDeleteAnnouncement = async function(annId) {
+      const confirmed = await customConfirm('確認刪除此公告？', '本動作無法復原。');
+      if (confirmed) {
+        appState.announcements = appState.announcements.filter(a => a.id !== annId);
+        await saveData();
+        renderAnnouncements();
+        showToast('已刪除公告', 'info');
+      }
+    };
+
+
+    // ==================== PROPOSAL HANDLERS ====================
+    window.handleSaveProposal = async function(event) {
+      event.preventDefault();
+      if (!appState.currentWeekId) {
+        showToast('請先建立或選擇週次', 'error');
+        return;
+      }
+
+      const id = document.getElementById('propFormId').value || 'prop_' + Date.now();
+      const group = document.getElementById('propGroup').value;
+      const status = document.getElementById('propStatus').value;
+      const title = document.getElementById('propTitle').value.trim();
+      const description = document.getElementById('propDescription').value.trim();
+      const suggestion = document.getElementById('propSuggestion').value.trim();
+      const resolution = document.getElementById('propResolution').value.trim();
+
+      const existingIndex = appState.proposals.findIndex(p => p.id === id);
+      const data = {
+        id,
+        weekId: appState.currentWeekId,
+        group,
+        status,
+        title,
+        description,
+        suggestion,
+        resolution,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (existingIndex >= 0) {
+        appState.proposals[existingIndex] = data;
+        showToast('已更新主管會議提案', 'success');
+      } else {
+        appState.proposals.push(data);
+        showToast('已新增主管會議提案', 'success');
+      }
+
+      await saveData();
+      closeModal('modalAddProposal');
+      renderProposals();
+    };
+
+    window.openEditProposalModal = function(propId) {
+      const p = appState.proposals.find(item => item.id === propId);
+      if (!p) return;
+
+      document.getElementById('modalProposalTitle').innerText = '✏️ 編輯主管會議提案';
+      document.getElementById('propFormId').value = p.id;
+      document.getElementById('propGroup').value = p.group || '輔導組';
+      document.getElementById('propStatus').value = p.status || '研擬中';
+      document.getElementById('propTitle').value = p.title || '';
+      document.getElementById('propDescription').value = p.description || '';
+      document.getElementById('propSuggestion').value = p.suggestion || '';
+      document.getElementById('propResolution').value = p.resolution || '';
+
+      openModal('modalAddProposal');
+    };
+
+    window.handleDeleteProposal = async function(propId) {
+      const confirmed = await customConfirm('確認刪除此提案？', '本動作無法復原。');
+      if (confirmed) {
+        appState.proposals = appState.proposals.filter(p => p.id !== propId);
+        await saveData();
+        renderProposals();
+        showToast('已刪除提案', 'info');
+      }
+    };
+
+    window.openQuickResolutionModal = function(propId) {
+      const p = appState.proposals.find(item => item.id === propId);
+      if (!p) return;
+
+      document.getElementById('quickPropId').value = p.id;
+      document.getElementById('quickPropTitleDisplay').innerText = p.title;
+      document.getElementById('quickPropStatus').value = p.status || '主管會議討論中';
+      document.getElementById('quickPropResolution').value = p.resolution || '';
+
+      openModal('modalQuickResolution');
+    };
+
+    window.handleSaveQuickResolution = async function(event) {
+      event.preventDefault();
+      const id = document.getElementById('quickPropId').value;
+      const p = appState.proposals.find(item => item.id === id);
+      if (!p) return;
+
+      p.status = document.getElementById('quickPropStatus').value;
+      p.resolution = document.getElementById('quickPropResolution').value.trim();
+      p.updatedAt = new Date().toISOString();
+
+      await saveData();
+      closeModal('modalQuickResolution');
+      renderProposals();
+      showToast('主管會議決議已成功更新', 'success');
+    };
+
+
+    // ==================== WEEK MANAGER TABLE MODAL ====================
+    function renderWeekManagerTable() {
+      const tbody = document.getElementById('weekManagerTableBody');
+      const todayStr = getLocalTodayStr();
+
+      if (appState.weeks.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">尚無任何週次紀錄</td></tr>`;
+        return;
+      }
+
+      const sorted = [...appState.weeks].sort((a, b) => {
+        if (a.academicYear !== b.academicYear) return b.academicYear - a.academicYear;
+        if (a.semester !== b.semester) return b.semester - a.semester;
+        return a.weekNumber - b.weekNumber;
+      });
+
+      tbody.innerHTML = sorted.map(w => {
+        const start = normalizeDateStr(w.startDate);
+        const end = normalizeDateStr(w.endDate);
+        const isCurrentCalendar = (start <= todayStr && todayStr <= end);
+
+        return `
+          <tr class="hover:bg-slate-50 border-b border-slate-100">
+            <td class="p-3 font-semibold">${w.academicYear}學年度 第${w.semester}學期</td>
+            <td class="p-3 font-bold text-slate-900">
+              第 ${w.weekNumber} 週
+              ${isCurrentCalendar ? `<span class="ml-1 text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded">本週</span>` : ''}
+            </td>
+            <td class="p-3 text-slate-700">${escapeHtml(w.topic || '-')}</td>
+            <td class="p-3 font-mono text-slate-600 text-[11px]">${start} ~ ${end}</td>
+            <td class="p-3 text-right space-x-1">
+              <button onclick="closeModal('modalManageWeeks'); handleWeekChange('${w.id}');" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-medium">
+                切換至此週
+              </button>
+              <button onclick="openEditWeekModal('${w.id}');" class="px-2 py-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-[11px] font-medium">
+                編輯
+              </button>
+              <button onclick="handleDeleteWeek('${w.id}');" class="px-2 py-1 bg-white border border-slate-300 hover:bg-red-50 text-red-600 rounded text-[11px] font-medium">
+                刪除
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+
+    // ==================== LINE BROADCAST TEXT FORMATTER ====================
+    window.copyLineBroadcastText = function() {
+      if (!appState.currentWeekId) {
+        showToast('請先建立或選擇週次', 'warning');
+        return;
+      }
+
+      const currentWeek = appState.weeks.find(w => w.id === appState.currentWeekId);
+      if (!currentWeek) return;
+
+      const wStart = normalizeDateStr(currentWeek.startDate);
+      const wEnd = normalizeDateStr(currentWeek.endDate);
+
+      let text = `【臺北市日新國小 輔導室 ${currentWeek.academicYear}學年度第${currentWeek.semester}學期 第${currentWeek.weekNumber}週處室公告】\n`;
+      text += `📅 期間：${wStart} ～ ${wEnd}\n`;
+      if (currentWeek.topic) text += `🎯 當週主題：${currentWeek.topic}\n`;
       text += `------------------------------------\n\n`;
 
+      // Filter Announcements
+      let anns = appState.announcements.filter(a => a.weekId === appState.currentWeekId);
+      if (appState.activeGroupFilter !== 'ALL') {
+        anns = anns.filter(a => a.group === appState.activeGroupFilter);
+      }
+
+      text += `📢 【每週處室公告事項】\n`;
       if (anns.length === 0) {
-        text += `本週無特殊處室公告。\n`;
+        text += `(本週無特別處室公告)\n`;
       } else {
         anns.forEach((a, idx) => {
           text += `${idx + 1}. [${a.group}] ${a.title}\n`;
-          text += `   🎯 對象：${a.target || '全校教職員'} | ⚡ 優先：${a.priority || '普通'}\n`;
+          text += `   • 對象：${a.targetAudience || '全校'}\n`;
           if (a.eventDate || a.eventTime) {
-            text += `   ⏰ 時間：${a.eventDate || ''} ${a.eventTime || ''}\n`;
+            text += `   • 時間：${a.eventDate || ''} ${a.eventTime || ''}\n`;
           }
-          text += `   📝 內容：${a.content}\n\n`;
+          text += `   • 內容：${a.content}\n\n`;
+        });
+      }
+
+      // Filter Proposals
+      let props = appState.proposals.filter(p => p.weekId === appState.currentWeekId);
+      if (appState.activeGroupFilter !== 'ALL') {
+        props = props.filter(p => p.group === appState.activeGroupFilter);
+      }
+
+      text += `------------------------------------\n`;
+      text += `📝 【主管會議提案與決議】\n`;
+      if (props.length === 0) {
+        text += `(本週無主管會議提案)\n`;
+      } else {
+        props.forEach((p, idx) => {
+          text += `${idx + 1}. [${p.group}] ${p.title}\n`;
+          text += `   • 案由：${p.description}\n`;
+          if (p.resolution) {
+            text += `   🏛️ 決議：${p.resolution}\n`;
+          }
+          text += `\n`;
         });
       }
 
       text += `------------------------------------\n`;
-      text += `詳細資訊請連線至輔導室事項管理系統查閱。`;
+      text += `臺北市大同區日新國民小學 輔導室敬啟`;
 
-      document.getElementById("lineMessageTextArea").value = text;
-      document.getElementById("lineModal").classList.remove("hidden");
-    };
-
-    window.closeLineModal = function() {
-      document.getElementById("lineModal").classList.add("hidden");
+      document.getElementById('lineBroadcastTextarea').value = text;
+      document.getElementById('copySuccessNotice').classList.add('hidden');
+      openModal('modalLineBroadcast');
     };
 
     window.executeCopyLineText = function() {
-      const txtArea = document.getElementById("lineMessageTextArea");
-      txtArea.select();
-      document.execCommand("copy");
-      showToast("📋 已成功複製 LINE 廣播訊息至剪貼簿！");
-      closeLineModal();
+      const textarea = document.getElementById('lineBroadcastTextarea');
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        document.getElementById('copySuccessNotice').classList.remove('hidden');
+        showToast('已複製到剪貼簿', 'success');
+      } catch (err) {
+        showToast('複製失敗，請手動全選複製', 'error');
+      }
     };
 
-    // ==================== IMPORT & EXPORT JSON ====================
-    window.exportDataJSON = function() {
-      const jsonStr = JSON.stringify(systemData, null, 2);
-      const blob = new Blob([jsonStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `日新國小輔導室事項備份_${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast("📥 資料已成功匯出 JSON 備份檔");
+
+    // ==================== STRICT A4 PRINTING & PREVIEW SYSTEM ====================
+    window.openPrintModal = function() {
+      if (!appState.currentWeekId) {
+        showToast('請先選擇要列印的週次', 'warning');
+        return;
+      }
+      updatePrintPreviewContent();
+      openModal('modalPrintPreview');
     };
 
-    window.triggerImportJSON = function() {
-      document.getElementById("importJsonInput").click();
+    window.updatePrintPreviewContent = function() {
+      const currentWeek = appState.weeks.find(w => w.id === appState.currentWeekId);
+      if (!currentWeek) return;
+
+      const scope = document.querySelector('input[name="printScope"]:checked').value;
+      const groupFilter = scope === 'FILTERED' ? appState.activeGroupFilter : 'ALL';
+      document.getElementById('printScopeGroupName').innerText = appState.activeGroupFilter === 'ALL' ? '全處室' : appState.activeGroupFilter;
+
+      const html = generatePrintReportHTML(currentWeek, groupFilter);
+      document.getElementById('onScreenPrintPreview').innerHTML = html;
     };
 
-    window.importDataJSON = function(e) {
-      const file = e.target.files[0];
+    function generatePrintReportHTML(currentWeek, groupFilter = 'ALL') {
+      const wStart = normalizeDateStr(currentWeek.startDate);
+      const wEnd = normalizeDateStr(currentWeek.endDate);
+      const todayStr = getLocalTodayStr();
+
+      // Get Announcements
+      let anns = appState.announcements.filter(a => a.weekId === currentWeek.id);
+      if (groupFilter !== 'ALL') {
+        anns = anns.filter(a => a.group === groupFilter);
+      }
+
+      // Get Proposals
+      let props = appState.proposals.filter(p => p.weekId === currentWeek.id);
+      if (groupFilter !== 'ALL') {
+        props = props.filter(p => p.group === groupFilter);
+      }
+
+      let html = `
+        <!-- Header with Emblem SVG -->
+        <div style="display: flex; items-center; align-items: center; justify-content: space-between; border-bottom: 2px solid #111827; padding-bottom: 8px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg style="width: 42px; height: 42px; flex-shrink: 0;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#cc0000">
+                <path d="M50 2 L56 22 L72 8 L68 28 L88 20 L76 38 L98 36 L80 50 L98 64 L76 62 L88 80 L68 72 L72 92 L56 78 L50 98 L44 78 L28 92 L32 72 L12 80 L24 62 L2 64 L20 50 L2 36 L24 38 L12 20 L32 28 L28 8 L44 22 Z"/>
+              </g>
+              <circle cx="50" cy="50" r="32" fill="#ffffff"/>
+              <circle cx="50" cy="50" r="28" fill="#cc0000"/>
+              <text x="50" y="44" font-family="sans-serif" font-weight="900" font-size="20" fill="#ffffff" text-anchor="middle" dominant-baseline="central">日</text>
+              <text x="50" y="62" font-family="sans-serif" font-weight="900" font-size="20" fill="#ffffff" text-anchor="middle" dominant-baseline="central">新</text>
+            </svg>
+            <div>
+              <h1 style="font-size: 16pt; font-weight: 800; margin: 0; color: #111827; line-height: 1.2;">
+                臺北市大同區日新國民小學 輔導室每週處室公告與主管會議決議表
+              </h1>
+              <p style="font-size: 9pt; margin: 2px 0 0 0; color: #4b5563;">
+                Taipei Municipal Rixin Elementary School - Guidance Office Weekly Report
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metadata Box -->
+        <div style="background-color: #f9fafb; border: 1px solid #d1d5db; padding: 8px 12px; font-size: 10pt; line-height: 1.5; margin-bottom: 14px; border-radius: 4px;">
+          <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+            <span><strong>學年度/學期：</strong>${currentWeek.academicYear} 學年度 第 ${currentWeek.semester} 學期</span>
+            <span><strong>週次與主題：</strong>第 ${currentWeek.weekNumber} 週 (${escapeHtml(currentWeek.topic || '一般行事')})</span>
+            <span><strong>起訖日期：</strong>${wStart} ~ ${wEnd}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 4px; border-top: 1px dashed #e5e7eb; padding-top: 4px;">
+            <span><strong>當週備註：</strong>${escapeHtml(currentWeek.notes || '無')}</span>
+            <span><strong>檢視範圍：</strong>${groupFilter === 'ALL' ? '全處室彙整版' : groupFilter}</span>
+            <span><strong>列印日期：</strong>${todayStr}</span>
+          </div>
+        </div>
+
+        <!-- Section 1: Announcements Table -->
+        <div class="print-section-header">壹、每週處室公告事項</div>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th style="width: 6%;">項次</th>
+              <th style="width: 11%;">組別</th>
+              <th style="width: 14%;">對象 / 優先</th>
+              <th style="width: 15%;">活動日期時間</th>
+              <th style="width: 44%;">公告標題與詳細內容</th>
+              <th style="width: 10%;">狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      if (anns.length === 0) {
+        html += `
+          <tr>
+            <td colspan="6" style="text-align: center; color: #6b7280; padding: 12px;">(本週無公告事項)</td>
+          </tr>
+        `;
+      } else {
+        anns.forEach((a, i) => {
+          html += `
+            <tr>
+              <td style="text-align: center; font-weight: bold;">${i + 1}</td>
+              <td style="text-align: center; font-weight: bold;">${escapeHtml(a.group)}</td>
+              <td>
+                <div>${escapeHtml(a.targetAudience || '全校')}</div>
+                <div style="font-size: 9pt; color: #4b5563; margin-top: 2px;">[${escapeHtml(a.priority || '普通')}]</div>
+              </td>
+              <td>
+                <div>${escapeHtml(a.eventDate || '-')}</div>
+                <div style="font-size: 9pt; color: #4b5563;">${escapeHtml(a.eventTime || '')}</div>
+              </td>
+              <td>
+                <div style="font-weight: bold; margin-bottom: 3px; color: #000;">${escapeHtml(a.title)}</div>
+                <div style="font-size: 10pt; color: #1f2937;">${escapeHtml(a.content)}</div>
+              </td>
+              <td style="text-align: center;">${escapeHtml(a.status || '進行中')}</td>
+            </tr>
+          `;
+        });
+      }
+
+      html += `
+          </tbody>
+        </table>
+
+        <!-- Section 2: Proposals Table -->
+        <div class="print-section-header">貳、主管會議提案與決議事項</div>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th style="width: 6%;">項次</th>
+              <th style="width: 11%;">組別</th>
+              <th style="width: 41%;">提案標題與案由 / 擬辦</th>
+              <th style="width: 30%;">主管會議決議事項</th>
+              <th style="width: 12%;">進度狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      if (props.length === 0) {
+        html += `
+          <tr>
+            <td colspan="5" style="text-align: center; color: #6b7280; padding: 12px;">(本週無主管會議提案)</td>
+          </tr>
+        `;
+      } else {
+        props.forEach((p, i) => {
+          html += `
+            <tr>
+              <td style="text-align: center; font-weight: bold;">${i + 1}</td>
+              <td style="text-align: center; font-weight: bold;">${escapeHtml(p.group)}</td>
+              <td>
+                <div style="font-weight: bold; color: #000; margin-bottom: 2px;">${escapeHtml(p.title)}</div>
+                <div style="font-size: 9.5pt; color: #111827;"><strong>【案由】</strong>${escapeHtml(p.description)}</div>
+                ${p.suggestion ? `<div style="font-size: 9pt; color: #374151; margin-top: 2px;"><strong>【擬辦】</strong>${escapeHtml(p.suggestion)}</div>` : ''}
+              </td>
+              <td style="font-weight: 500; color: #0f172a;">
+                ${p.resolution ? escapeHtml(p.resolution) : '<span style="color:#9ca3af; font-style:italic;">(無紀錄)</span>'}
+              </td>
+              <td style="text-align: center;">${escapeHtml(p.status || '研擬中')}</td>
+            </tr>
+          `;
+        });
+      }
+
+      html += `
+          </tbody>
+        </table>
+
+        <!-- Signature Block -->
+        <div class="print-signature-block">
+          <table style="width: 100%; border-collapse: collapse; border: none;">
+            <tr style="border: none;">
+              <td style="border: none; width: 33.3%; text-align: left; font-size: 11pt; font-weight: bold; color: #111827;">
+                承辦組長：________________
+              </td>
+              <td style="border: none; width: 33.3%; text-align: center; font-size: 11pt; font-weight: bold; color: #111827;">
+                輔導主任：________________
+              </td>
+              <td style="border: none; width: 33.3%; text-align: right; font-size: 11pt; font-weight: bold; color: #111827;">
+                校長：________________
+              </td>
+            </tr>
+          </table>
+        </div>
+      `;
+
+      return html;
+    }
+
+    window.triggerActualPrint = function() {
+      const currentWeek = appState.weeks.find(w => w.id === appState.currentWeekId);
+      if (!currentWeek) return;
+
+      const scope = document.querySelector('input[name="printScope"]:checked').value;
+      const groupFilter = scope === 'FILTERED' ? appState.activeGroupFilter : 'ALL';
+
+      // Populate dedicated #printArea outside appShell
+      const printArea = document.getElementById('printArea');
+      printArea.innerHTML = generatePrintReportHTML(currentWeek, groupFilter);
+
+      // Trigger standard print
+      window.print();
+    };
+
+
+    // ==================== JSON BACKUP EXPORT & IMPORT ====================
+    window.exportBackupJSON = function() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        weeks: appState.weeks,
+        announcements: appState.announcements,
+        proposals: appState.proposals,
+        exportedAt: new Date().toISOString()
+      }, null, 2));
+
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `rixin_guidance_backup_${getLocalTodayStr()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      showToast('已成功匯出 JSON 備份檔', 'success');
+    };
+
+    window.importBackupJSON = function(event) {
+      const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(evt) {
+      reader.onload = async (e) => {
         try {
-          const parsed = JSON.parse(evt.target.result);
-          if (parsed && parsed.weeks && Array.isArray(parsed.weeks)) {
-            systemData = parsed;
-            syncToFirebase();
-            renderAll();
-            showToast("📤 JSON 備份資料已成功匯入與同步！");
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed.weeks)) {
+            const confirmed = await customConfirm(
+              '確定要匯入此備份檔嗎？',
+              `將會覆蓋現有資料庫資料，包含 ${parsed.weeks.length} 個週次。`,
+              true
+            );
+
+            if (confirmed) {
+              appState.weeks = parsed.weeks || [];
+              appState.announcements = parsed.announcements || [];
+              appState.proposals = parsed.proposals || [];
+
+              syncWeekSelectionAfterDataLoad();
+              await saveData();
+              renderUI();
+              showToast('已成功匯入備份資料！', 'success');
+            }
           } else {
-            showToast("❌ 備份檔格式不符", "error");
+            showToast('JSON 格式不符，缺少 weeks 陣列', 'error');
           }
         } catch (err) {
-          showToast("❌ 無法解析上傳的 JSON 檔案", "error");
+          showToast('無法解析此 JSON 檔案', 'error');
         }
       };
       reader.readAsText(file);
+      event.target.value = '';
     };
 
-    // ==================== DIAGNOSTIC MODAL ====================
-    window.openDiagnosticModal = function() {
-      document.getElementById("diagnosticModal").classList.remove("hidden");
+    window.toggleExportImportMenu = function() {
+      const menu = document.getElementById('exportImportMenu');
+      menu.classList.toggle('hidden');
     };
 
-    window.closeDiagnosticModal = function() {
-      document.getElementById("diagnosticModal").classList.add("hidden");
+    window.hideExportImportMenu = function() {
+      document.getElementById('exportImportMenu').classList.add('hidden');
     };
 
-    // ==================== DIALOG & TOAST UTILS ====================
-    function openCustomDialog({ title, message, confirmText, confirmClass, onConfirm }) {
-      document.getElementById("dialogTitle").innerText = title;
-      document.getElementById("dialogMessage").innerText = message;
-      
-      const btnContainer = document.getElementById("dialogButtons");
-      btnContainer.innerHTML = `
-        <button id="dialogCancelBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100">取消</button>
-        <button id="dialogConfirmBtn" class="px-4 py-1.5 rounded-lg text-xs font-bold ${confirmClass || 'bg-red-600 text-white'}">${confirmText || '確定'}</button>
-      `;
 
-      document.getElementById("dialogCancelBtn").onclick = closeCustomDialog;
-      document.getElementById("dialogConfirmBtn").onclick = () => {
-        closeCustomDialog();
-        if (onConfirm) onConfirm();
-      };
+    // ==================== GENERAL MODAL HELPERS ====================
+    window.openModal = function(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.classList.remove('hidden');
 
-      document.getElementById("customDialogModal").classList.remove("hidden");
-    }
+      if (modalId === 'modalAddWeek' && !document.getElementById('weekFormId').value) {
+        document.getElementById('weekAcademicYear').value = 115;
+        document.getElementById('weekSemester').value = 1;
+        document.getElementById('weekNumber').value = (appState.weeks.length + 1) || 1;
+        
+        // Auto pre-fill dates for new week only if empty
+        if (!document.getElementById('weekStartDate').value) {
+          const now = new Date();
+          const day = now.getDay();
+          const diffToMon = (day === 0 ? -6 : 1) - day;
+          const mon = new Date(now);
+          mon.setDate(now.getDate() + diffToMon);
+          const sun = new Date(mon);
+          sun.setDate(mon.getDate() + 6);
 
-    function closeCustomDialog() {
-      document.getElementById("customDialogModal").classList.add("hidden");
-    }
+          const formatYMD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          document.getElementById('weekStartDate').value = formatYMD(mon);
+          document.getElementById('weekEndDate').value = formatYMD(sun);
+        }
+      }
 
-    function showToast(msg, type = "success") {
-      const toast = document.getElementById("toast");
-      const icon = document.getElementById("toastIcon");
-      const text = document.getElementById("toastText");
+      if (modalId === 'modalManageWeeks') {
+        renderWeekManagerTable();
+      }
+    };
 
-      text.innerText = msg;
-      icon.innerText = type === "warning" ? "⚠️" : (type === "error" ? "❌" : "✅");
+    window.closeModal = function(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.add('hidden');
 
-      toast.classList.remove("translate-y-20", "opacity-0", "pointer-events-none");
-      setTimeout(() => {
-        toast.classList.add("translate-y-20", "opacity-0", "pointer-events-none");
-      }, 3000);
-    }
+      // Clear form inputs if add/edit forms
+      if (modalId === 'modalAddWeek') {
+        document.getElementById('formWeek').reset();
+        document.getElementById('weekFormId').value = '';
+        document.getElementById('modalWeekTitle').innerText = '📅 新增行事週次';
+      }
+      if (modalId === 'modalAddAnnouncement') {
+        document.getElementById('formAnnouncement').reset();
+        document.getElementById('annFormId').value = '';
+        document.getElementById('modalAnnouncementTitle').innerText = '📢 新增每週處室公告';
+      }
+      if (modalId === 'modalAddProposal') {
+        document.getElementById('formProposal').reset();
+        document.getElementById('propFormId').value = '';
+        document.getElementById('modalProposalTitle').innerText = '📝 新增主管會議提案';
+      }
+    };
 
-    function escapeHTML(str) {
-      if (!str) return '';
-      return str.replace(/[&<>"']/g, function(m) {
-        return {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#039;'
-        }[m];
-      });
-    }
+    window.openFirebaseInfoModal = function() {
+      const detail = document.getElementById('diagStatusDetail');
+      if (appState.isOnline) {
+        detail.className = "p-3 rounded-lg font-bold bg-emerald-100 text-emerald-800 border border-emerald-200";
+        detail.innerText = "🟢 雲端 Firebase 即時連線正常，支援多人共同編輯。";
+      } else {
+        detail.className = "p-3 rounded-lg font-bold bg-amber-100 text-amber-900 border border-amber-200";
+        detail.innerText = `🟠 離線單機模式中 (${appState.errorDetails || '無法連線至雲端'})`;
+      }
+      openModal('modalFirebaseInfo');
+    };
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('exportImportMenu');
+      if (!e.target.closest('.relative')) {
+        if (menu && !menu.classList.contains('hidden')) {
+          menu.classList.add('hidden');
+        }
+      }
+    });
+
   </script>
 </body>
 </html>
